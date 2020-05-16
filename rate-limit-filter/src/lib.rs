@@ -6,8 +6,7 @@ use std::time::Duration;
 use rate_limiter::RateLimiter;
 use std::time::SystemTime;
 
-const RPM: u32 = 10;
-static mut rl: RateLimiter = RateLimiter::new(RPM);
+// static mut rl: RateLimiter = RateLimiter::new();
 
 #[no_mangle]
 pub fn _start() {
@@ -36,16 +35,22 @@ impl HttpContext for UpstreamCall {
         let tm = curr.duration_since(SystemTime::UNIX_EPOCH).unwrap();
         let mn = (tm.as_secs()/60)%60;
         let sc = tm.as_secs()%60;
-        unsafe {
-            if !rl.update(sc as i32) {
-                self.send_http_response(
-                    429,
-                    vec![("Powered-By", "proxy-wasm")],
-                    Some(b"Limit exceeded.\n"),
-                );
-                return Action::Pause
-            }
-        }
+        // unsafe {
+            // }
+            let mut rl = RateLimiter::get();
+                    if !rl.update(mn as i32) {
+                        self.send_http_response(
+                            429,
+                            vec![("Powered-By", "proxy-wasm")],
+                            Some(b"Limit exceeded.\n"),
+                        );
+                    rl.set();
+                    return Action::Pause
+                    }
+                    proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str());
+                    
+                    rl.set();
+
         Action::Continue
     }
     
@@ -58,7 +63,6 @@ impl HttpContext for UpstreamCall {
 
 impl UpstreamCall {
     // fn retrieve_rl(&self) -> RateLimiter {
-        
     // }
 }
 
