@@ -48,14 +48,18 @@ impl HttpContext for UpstreamCall {
         }
         Action::Continue
     }
-
-    fn retrieve_rl(&self) -> RateLimiter {
-        
-    }
-
+    
+    
+    
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
         Action::Continue
     }
+}
+
+impl UpstreamCall {
+    // fn retrieve_rl(&self) -> RateLimiter {
+        
+    // }
 }
 
 impl Context for UpstreamCall {}
