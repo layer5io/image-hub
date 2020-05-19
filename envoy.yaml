@@ -71,7 +71,7 @@ static_resources:
     hosts:
     - socket_address:
         address: web_service
-        port_value: 5678
+        port_value: 9091
   # - name: wasm_upstream
   #   connect_timeout: 0.25s
   #   type: STRICT_DNS

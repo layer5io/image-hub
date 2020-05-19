@@ -6,17 +6,26 @@ import (
 	"net/http"
 )
 
+func CORSMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Our middleware logic goes here...
+		// Set CORS headers for the preflight request
+		if r.Method == http.MethodOptions {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "*")
+			w.Header().Set("Access-Control-Allow-Headers", "*")
+			w.Header().Set("Access-Control-Max-Age", "3600")
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		// Set CORS headers for the main request.
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		next.ServeHTTP(w, r)
+	})
+}
+
 func hello(w http.ResponseWriter, req *http.Request) {
-	ck, err := req.Cookie("token")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-	token := ck.Value
-	if token == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	token := req.Header.Get("Authorization")
 	w.Write([]byte("Hello, " + token + ", welcome to dockercon 2020!"))
 }
 
@@ -24,40 +33,28 @@ func auth(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	data, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.SetCookie(w, &http.Cookie{
-			Name:   "token",
-			MaxAge: 0,
-		})
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	var mp map[string]string
 	err = json.Unmarshal(data, &mp)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.SetCookie(w, &http.Cookie{
-			Name:   "token",
-			MaxAge: 0,
-		})
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	username := mp["username"]
 	if username == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		http.SetCookie(w, &http.Cookie{
-			Name:   "token",
-			MaxAge: 0,
-		})
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	http.SetCookie(w, &http.Cookie{
-		Name:  "token",
-		Value: username,
+	json.NewEncoder(w).Encode(map[string]string{
+		"token": username,
 	})
 }
 
 func main() {
-	http.HandleFunc("/hello", hello)
-	http.HandleFunc("/auth", auth)
-	http.ListenAndServe(":8080", nil)
+	mux := http.NewServeMux()
+	mux.Handle("/hello", CORSMiddleware(http.HandlerFunc(hello)))
+	mux.Handle("/auth", CORSMiddleware(http.HandlerFunc(auth)))
+	http.ListenAndServe(":9091", mux)
 }

@@ -1,0 +1,95 @@
+# Service to expose web frontend
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+spec:
+  type: NodePort
+  selector:
+    app: web
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+    nodePort: 30007
+---
+# Web frontend
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+  labels:
+    app: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+      annotations:
+        "consul.hashicorp.com/connect-inject": "true"
+        "consul.hashicorp.com/connect-service-upstreams": "api:9091"
+        "consul.hashicorp.com/connect-service-protocol": "http"
+    spec:
+      containers:
+      - name: web
+        image: layer5io/dockercon-2020-web:dev
+        ports:
+        - containerPort: 8080
+        env:
+        - name: "LISTEN_ADDR"
+          value: "0.0.0.0:8080"
+        - name: "UPSTREAM_URIS"
+          value: "http://localhost:9091"
+        - name: "NAME"
+          value: "web"
+        - name: "MESSAGE"
+          value: "Hello World"
+        - name: "HTTP_CLIENT_KEEP_ALIVES"
+          value: "false"
+        - name: "TRACING_ZIPKIN"
+          value: "http://jaeger-collector:9411"
+
+---
+# API service version 2
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment-v1
+  labels:
+    app: api-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-v1
+  template:
+    metadata:
+      labels:
+        app: api-v1
+      annotations:
+        "consul.hashicorp.com/connect-inject": "true"
+        "consul.hashicorp.com/service-meta-version": "1"
+        "consul.hashicorp.com/service-tags": "v1"
+        "consul.hashicorp.com/connect-service-protocol": "http"
+        "consul.hashicorp.com/connect-wasm-filter-add_header": "/filters/optimized.wasm"
+    spec:
+      containers:
+      - name: api
+        image: layer5io/dockercon-2020-api:dev
+        ports:
+        - containerPort: 8080
+        env:
+        - name: "LISTEN_ADDR"
+          value: "0.0.0.0:9090"
+        - name: "NAME"
+          value: "api-v1"
+        - name: "MESSAGE"
+          value: "Response from API v1"

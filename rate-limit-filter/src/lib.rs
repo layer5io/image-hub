@@ -27,8 +27,20 @@ impl UpstreamCall {
     }
 }
 
+static ALLOWED_PATHS: [&str; 1] = ["/auth"];
+
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
+        if let Some(method) = self.get_http_request_header(":method") {
+            if method == "OPTIONS" {
+                return Action::Continue
+            }
+        }
+        if let Some(path) = self.get_http_request_header(":path") {
+            if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
+                return Action::Continue
+            }
+        }
         if let Some(header) = self.get_http_request_header("Authorization") {
             let curr = self.get_current_time();
             let tm = curr.duration_since(SystemTime::UNIX_EPOCH).unwrap();

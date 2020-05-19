@@ -14,32 +14,19 @@ services:
       - "80"
       - "8001"
     ports:
-      - "18000:80"
+      - "9091:80"
       - "18001:8001"
 
   web_service:
-    image: hashicorp/http-echo
-    command:
-      - '-text="Wasm filter test"'
+    image: layer5io/dockercon-2020-api:dev
     networks:
       envoymesh:
         aliases:
           - web_service
     expose:
-      - "5678"
+      - "9091"
     ports:
-      - "18080:5678"
-      
-  # wasm_upstream:
-  #   image: wasm-upstream:latest
-  #   networks:
-  #     envoymesh:
-  #       aliases:
-  #         - wasm_upstream
-  #   expose:
-  #     - "8080"
-  #   ports:
-  #     - "8080:8080"
+      - "9000:9091"
 
 networks:
   envoymesh: {}

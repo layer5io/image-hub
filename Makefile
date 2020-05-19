@@ -20,3 +20,10 @@ build-web:
 
 build-api:
 	cd api && docker build -t layer5io/dockercon-2020-api:dev .
+
+dev-run-api: build-api deploy
+
+dev-run-web: 
+	cd web && yarn serve
+	
+	
