@@ -84,12 +84,12 @@ export default {
   }),
   methods: {
     login: function () {
-      axios.post("http://localhost:18000/auth",{
+      axios.post("http://localhost:9091/auth",{
         username: this.username,
         password: this.password
       }).then((res) => {
         console.log(res)
-        localStorage.setItem("token", res["token"])
+        localStorage.setItem("token", res.data["token"])
       }).catch((res) => {
         console.log(res)
       })
