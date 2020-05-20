@@ -1,6 +1,6 @@
 global:
   image: nicholasjackson/consul-envoy:dev-dev
-  imageK8S: nicholasjackson/consul-k8s-dev:latest
+  imageK8S: nicholasjackson/consul-k8s-dev:dev
 
 # Available parameters and their default values for the Consul chart.
 # Server, when enabled, configures a server cluster to run. This should

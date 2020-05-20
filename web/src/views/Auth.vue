@@ -84,7 +84,7 @@ export default {
   }),
   methods: {
     login: function () {
-      axios.post("http://localhost:9091/auth",{
+      axios.post("/api/auth",{
         username: this.username,
         password: this.password
       }).then((res) => {

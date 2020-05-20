@@ -2,6 +2,9 @@
     <v-app id="inspire">
         <h2>{{message}}</h2>
         <v-btn color="primary" @click="generateLoad">Generate Load</v-btn>
+        <router-link :to="{name: 'Auth'}">
+            <button id="myButton" class="foo bar">Go!</button>
+        </router-link>
     </v-app>
 </template>
 
@@ -14,7 +17,7 @@ export default {
     created() {
         console.log('Component has been created!');
         let token = localStorage.getItem("token")
-        axios.get("http://localhost:9091/hello", {
+        axios.get("/api/hello", {
             headers: {
                 Authorization: token
             }
@@ -34,7 +37,7 @@ export default {
         let pArr = []
         let token = localStorage.getItem("token")
         for (let i = 0; i < REQ_CNT; i++) {
-            pArr.push(axios.get("http://localhost:9091/hello", {
+            pArr.push(axios.get("/api/hello", {
             headers: {
                 Authorization: token
             }
