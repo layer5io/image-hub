@@ -1,10 +1,32 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
+
+type User struct {
+	Username string
+	Password string
+	Plan     string
+}
+
+var DB = [4]User{User{
+	Username: "Alice",
+	Password: "alice",
+	Plan:     "Enterprise",
+}, User{
+	Username: "Bob",
+	Password: "bob",
+	Plan:     "Team",
+}, User{
+	Username: "Eve",
+	Password: "eve",
+	Plan:     "Personal",
+}}
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -38,17 +60,39 @@ func auth(w http.ResponseWriter, req *http.Request) {
 	}
 	var mp map[string]string
 	err = json.Unmarshal(data, &mp)
+	fmt.Printf("1 %v", mp)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	username := mp["username"]
-	if username == "" {
+	password := mp["password"]
+	var matchedUser User
+	for _, item := range DB {
+		if item.Username == username && item.Password == password {
+			matchedUser.Username = username
+			matchedUser.Plan = item.Plan
+		}
+	}
+	fmt.Printf("2 %v", matchedUser)
+	if matchedUser.Username == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	token, err := json.Marshal(&map[string]string{
+		"username": matchedUser.Username,
+		"plan":     matchedUser.Plan,
+	})
+
+	fmt.Printf("3 %v", string(token))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	json.NewEncoder(w).Encode(map[string]string{
-		"token": username,
+		"token": base64.RawStdEncoding.EncodeToString(token),
 	})
 }
 

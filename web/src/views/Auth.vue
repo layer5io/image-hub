@@ -73,6 +73,9 @@
 // import HelloWorld from './components/HelloWorld';
 import axios from 'axios';
 
+// const BASE = "http://0.0.0.0:9091"
+const BASE = "/api"
+
 export default {
   name: 'App',
   created() {
@@ -84,7 +87,7 @@ export default {
   }),
   methods: {
     login: function () {
-      axios.post("/api/auth",{
+      axios.post(BASE + "/auth",{
         username: this.username,
         password: this.password
       }).then((res) => {

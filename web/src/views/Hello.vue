@@ -11,18 +11,21 @@
 <script>
 import axios from 'axios';
 
-const REQ_CNT = 10;
+const REQ_CNT = 500;
+// const BASE = "http://0.0.0.0:9091"
+const BASE = "/api"
 
 export default {
     created() {
         console.log('Component has been created!');
         let token = localStorage.getItem("token")
-        axios.get("/api/hello", {
+        let userObj = JSON.parse(atob(token))
+        axios.get(BASE + "/hello", {
             headers: {
                 Authorization: token
             }
         }).then((res) => {
-            this.message = res.data 
+            this.message = `Hello ${userObj.username} (${userObj.plan})` 
             console.log(res)
         }).catch((res) => {
             console.log(res)
@@ -37,7 +40,7 @@ export default {
         let pArr = []
         let token = localStorage.getItem("token")
         for (let i = 0; i < REQ_CNT; i++) {
-            pArr.push(axios.get("/api/hello", {
+            pArr.push(axios.get(BASE + "/hello", {
             headers: {
                 Authorization: token
             }

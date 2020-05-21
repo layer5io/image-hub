@@ -5,6 +5,7 @@ use proxy_wasm::types::*;
 use std::time::Duration;
 use rate_limiter::RateLimiter;
 use std::time::SystemTime;
+use serde::{Serialize,Deserialize};
 
 #[no_mangle]
 pub fn _start() {
@@ -36,6 +37,12 @@ static CORS_HEADERS: [(&str,&str);5] = [
     ("Access-Control-Max-Age", "3600")   
 ];
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Data {
+    username: String,
+    plan: String,
+}
+
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
         if let Some(method) = self.get_http_request_header(":method") {
@@ -54,25 +61,29 @@ impl HttpContext for UpstreamCall {
             }
         }
         if let Some(header) = self.get_http_request_header("Authorization") {
-            let curr = self.get_current_time();
-            let tm = curr.duration_since(SystemTime::UNIX_EPOCH).unwrap();
-            let mn = (tm.as_secs()/60)%60;
-            let sc = tm.as_secs()%60;
-            let mut rl = RateLimiter::get(header);
+            if let Ok(token) = base64::decode(header) {
+                let obj: Data = serde_json::from_slice(&token).unwrap();
+                proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", obj).as_str());
+                let curr = self.get_current_time();
+                let tm = curr.duration_since(SystemTime::UNIX_EPOCH).unwrap();
+                let mn = (tm.as_secs()/60)%60;
+                let sc = tm.as_secs()%60;
+                let mut rl = RateLimiter::get(obj.username, obj.plan);
                         if !rl.update(mn as i32) {
                             self.send_http_response(
                                 429,
                                 CORS_HEADERS.to_vec(),
                                 Some(b"Limit exceeded.\n"),
                             );
-                        rl.set();
-                        return Action::Pause
+                            rl.set();
+                            return Action::Pause
                         }
                         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str());
                         
                         rl.set();
-    
-            return Action::Continue
+                        
+                        return Action::Continue
+                    }
         }
         self.send_http_response(
             401,
