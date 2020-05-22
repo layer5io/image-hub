@@ -79,7 +79,7 @@
             text
             @click="dialog = false; upgradeButton = false"
           >
-            Cancel
+            Ok
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -125,7 +125,7 @@ export default {
             return
         }
         let userObj = JSON.parse(atob(token))
-        axios.get(this.$BASE_URL + "/hello", {
+        axios.get(this.$BASE_URL + "/pull", {
             headers: {
                 Authorization: token
             }

@@ -140,7 +140,7 @@ func signup(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	mux := http.NewServeMux()
-	mux.Handle("/hello", CORSMiddleware(http.HandlerFunc(hello)))
+	mux.Handle("/pull", CORSMiddleware(http.HandlerFunc(hello)))
 	mux.Handle("/auth", CORSMiddleware(http.HandlerFunc(auth)))
 	mux.Handle("/signup", CORSMiddleware(http.HandlerFunc(signup)))
 	mux.Handle("/upgrade", CORSMiddleware(http.HandlerFunc(upgrade)))

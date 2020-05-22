@@ -12,7 +12,7 @@
           :key="card.title"
           cols="4"
         >
-          <v-card>
+          <v-card class="fill-height">
             <v-list-item three-line>
       <v-list-item-content class="ma-6">
         <div class="overline mb-4">{{card.price}}</div>
