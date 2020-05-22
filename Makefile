@@ -16,14 +16,14 @@ clean:
 	cargo clean
 
 build-web:
-	cd web && docker build -t kanishkarj/dockercon-2020-web:dev .
+	cd web && docker build -t kanishkarj/dockercon-2020-web:latest .
 
 build-api:
-	cd api && docker build -t kanishkarj/dockercon-2020-api:dev .
+	cd api && docker build -t kanishkarj/dockercon-2020-api:latest .
 
 build-envoy: build
 	cp rate-limit-filter/target/wasm32-unknown-unknown/release/rate_limit_filter.wasm envoy/rate_limit_filter.wasm
-	cd envoy && docker build -t kanishkarj/envoy-wasm-filter:dev .
+	cd envoy && docker build -t kanishkarj/envoy-wasm-filter:latest .
 
 dev-run-api: build-api deploy
 
@@ -44,3 +44,7 @@ cache-delete:
 	minikube cache delete layer5io/dockercon-2020-api:dev
 	minikube cache delete layer5io/dockercon-2020-web:dev
 	
+images-push:
+	docker push kanishkarj/dockercon-2020-web:latest
+	docker push kanishkarj/dockercon-2020-api:latest
+	docker push kanishkarj/envoy-wasm-filter:latest
