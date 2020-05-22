@@ -23,7 +23,7 @@
       </v-list-item-content>
     </v-list-item>
     <v-card-actions>
-      <v-btn text @click="upgrade">upgrade</v-btn>
+      <v-btn text @click="upgrade(card.plan)">upgrade</v-btn>
     </v-card-actions>
           </v-card>
         </v-col>
@@ -38,20 +38,21 @@ import axios from 'axios';
   export default {
     data: () => ({
       cards: [
-        { price: '0$', plan: 'Personal', rpm: '500 pulls / min', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ornare lacinia pulvinar. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nam lacinia odio a scelerisque aliquet. Praesent viverra vehicula libero, vulputate fermentum arcu viverra non. Nunc ut quam sed nunc faucibus dignissim nec et purus.'},
-        { price: '10$/month', plan: 'Team', rpm: '10000 pulls / min', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ornare lacinia pulvinar. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nam lacinia odio a scelerisque aliquet. Praesent viverra vehicula libero, vulputate fermentum arcu viverra non. Nunc ut quam sed nunc faucibus dignissim nec et purus.'},
-        { price: '100$/month', plan: 'Enterprise', rpm: 'Unlimited', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ornare lacinia pulvinar. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nam lacinia odio a scelerisque aliquet. Praesent viverra vehicula libero, vulputate fermentum arcu viverra non. Nunc ut quam sed nunc faucibus dignissim nec et purus.'},
+        { price: 'FREE', plan: 'Personal', rpm: '10 pulls / min', content: 'The basics of Docker for every developer, including unlimited public repos and one private repo.'},
+        { price: '$10/month', plan: 'Team', rpm: '100 pulls / min', content: 'Pulls and tools for a development team popular projects, including unlimited public repos and ten private repos.'},
+        { price: '$100/month', plan: 'Enterprise', rpm: 'Unlimited', content: 'Unlimited pulls and advanced tools for all your teams and their popular projects, including unlimited public repos and a thousand private repos.'},
       ],
     }),
     methods: {
-    upgrade: function () {
+    upgrade: function (upgradePlan) {
       let token = localStorage.getItem("token")
-    let userObj = JSON.parse(atob(token))
+      let userObj = JSON.parse(atob(token))
       axios.post(this.$BASE_URL + "/upgrade",{
         username: userObj.username,
-        plan: userObj.plan
+        plan: upgradePlan
       }).then((res) => {
         console.log(res)
+        localStorage.setItem("token", res.data["token"])
         this.$router.push({ name: 'Hello'})
       }).catch((res) => {
         console.log(res)

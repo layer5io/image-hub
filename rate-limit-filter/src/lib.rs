@@ -69,8 +69,7 @@ impl HttpContext for UpstreamCall {
                 let mn = (tm.as_secs()/60)%60;
                 let sc = tm.as_secs()%60;
                 let mut rl = RateLimiter::get(obj.username, obj.plan);
-                let lim = rl.update(mn as i32);        
-                if lim == 0  {
+                if !rl.update(mn as i32)  {
                             self.send_http_response(
                                 429,
                                 CORS_HEADERS.to_vec(),
@@ -79,12 +78,10 @@ impl HttpContext for UpstreamCall {
                             rl.set();
                             return Action::Pause
                         }
-                        proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str());
-                        
-                        rl.set();
-                        
-                        return Action::Continue
-                    }
+                    proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str());
+                    rl.set();
+                    return Action::Continue
+                }
         }
         self.send_http_response(
             401,

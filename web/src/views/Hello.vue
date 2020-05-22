@@ -1,9 +1,6 @@
 <template>
-    <v-app id="inspire">
           <v-content>
-              
-              <v-card>
-
+              <v-card flat>
                   <v-row justify="space-between">
         <v-col cols="auto">
           <v-img
@@ -12,23 +9,17 @@
               width="100"
             ></v-img>
         </v-col>
-
-        <v-col
-        >
-                  
+        <v-col>
             <v-list-item three-line>
       <v-list-item-content class="ma-6">
-        <div class="overline mb-4">Welcome</div>
+        <div class="overline mb-4">Joined October 24, 2018</div>
         <v-list-item-title class="headline mb-1">Layer5</v-list-item-title>
         <v-list-item-subtitle class=" mb-2">The Service Mesh Company</v-list-item-subtitle>
-        <v-list-item-content>Lorem ipsum dolor sit amet, consectetur adipiscing elit</v-list-item-content>
-
       </v-list-item-content>
     </v-list-item>
         </v-col>
                   </v-row>
           </v-card>
-
 
 <v-card
     class="mx-auto mt-10"
@@ -55,7 +46,6 @@
     </template>
   </v-simple-table>
   </v-card>
-  </v-content>
   <v-dialog
       v-model="dialog"
       width="500"
@@ -68,7 +58,6 @@
         >
           {{dialogTitle}}
         </v-card-title>
-
         <v-card-text>
           {{dialogBody}}
         </v-card-text>
@@ -81,20 +70,21 @@
             color="primary"
             text
             @click="upgrade"
+            v-if="upgradeButton"
           >
             Upgrade
           </v-btn>
           <v-btn
             color="primary"
             text
-            @click="dialog = false"
+            @click="dialog = false; upgradeButton = false"
           >
             Cancel
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    </v-app>
+  </v-content>
 </template>
 
 <script>
@@ -124,6 +114,7 @@ export default {
         dialog: false,
         dialogTitle: "",
         dialogBody: "",
+        upgradeButton: false,
     }),
   methods: {
     pullImage: function () {
@@ -142,21 +133,21 @@ export default {
             this.message = `Hello ${userObj.username} (${userObj.plan}) !` 
             
             this.dialogTitle = `Hello ${userObj.username}!`
-            this.dialogBody = `The image has been successfully pulled! you are subsribed to ${userObj.plan} plan, please click on the upgrade button to upgrade.`
+            this.dialogBody = `Image pull request in-progress...`
             this.dialog = true
             
             console.log(res)
         }).catch((res) => {
             console.log(res)
-            if (res.response.status == 429) {
-                this.dialogTitle = `Sorry ${userObj.username}!`
-                this.dialogBody = `The image pull failed as you have exceeded your limit! you are subsribed to ${userObj.plan} plan, please click on the upgrade button to upgrade.`
+            if (res.response != null && res.response.status == 429) {
+                this.dialogTitle = `Plan Limit Exceeded`
+                this.dialogBody = `Sorry, you have reached your daily image pull limit under your current plan (${userObj.plan}). Need more pulls today? Click below to upgrade your plan.`
                 this.dialog = true
-                // this.message = "Limit Exceeded"
+                this.upgradeButton = true
             } else {
-                this.dialogTitle = `Please Login / Signup!`
-                this.dialogBody = `You are unauthorized to pull images, please login to continue.`
-                this.dialog = true
+                // this.dialogTitle = `Please Login / Signup!`
+                // this.dialogBody = `You are unauthorized to pull images, please login to continue.`
+                // this.dialog = true
             }
         })
     },

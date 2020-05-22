@@ -2,13 +2,13 @@
   <v-app id="inspire">
     <v-app-bar
       app
-      color="indigo"
+      color="#3C494F"
       dark
     >
 
       <v-toolbar-title><router-link :to="{name: 'Hello'}">
       <v-btn text>
-        Home
+        HUB
       </v-btn>
         </router-link>
       </v-toolbar-title>

@@ -14,9 +14,9 @@ pub struct RateLimiter {
 impl RateLimiter {
     fn new(key: &String, plan: &String) -> Self {
         let limit = match plan.as_str() {
-            "Team" => Some(800),
-            "Enterprise" => None,
-            _ => Some(400),
+            "Team" => Some(100),
+            "Personal" => Some(10),
+            _ => None,
         };
         Self {
             RPM: limit,
@@ -29,7 +29,13 @@ impl RateLimiter {
         if let Ok(data) = proxy_wasm::hostcalls::get_shared_data(&key.clone()) {
             if let Some(data) = data.0 {
                 let data: Option<Self> = bincode::deserialize(&data).unwrap_or(None);
-                if let Some(obj) = data {
+                if let Some(mut obj) = data {
+                    let limit = match plan.as_str() {
+                        "Team" => Some(100),
+                        "Personal" => Some(10),
+                        _ => None,
+                    };
+                    obj.RPM = limit;
                     return obj
                 }
             }
@@ -41,21 +47,18 @@ impl RateLimiter {
         let encoded: Vec<u8> = bincode::serialize(&target).unwrap();
         proxy_wasm::hostcalls::set_shared_data(&self.key.clone(), Some(&encoded), None);
     }
-    pub fn update(&mut self, time: i32) -> i32 {
+    pub fn update(&mut self, time: i32) -> bool {
         if self.Min != time {
             self.Min = time;
             self.Count = 0;
         }
         self.Count += 1;
-        proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", self.Count).as_str());
+        proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?} {:?}", self.Count, self.RPM).as_str());
         if let Some(sm) = self.RPM {
             if self.Count > sm {
-                return 0
-            } else {
-                return (sm - self.Count) as i32
+                return false
             }
-        } else {
-            return -1;
         }
+        return true
     }
 }

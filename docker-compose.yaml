@@ -18,7 +18,7 @@ services:
       - "18001:8001"
 
   web_service:
-    image: layer5io/dockercon-2020-api:dev
+    image: kanishkarj/dockercon-2020-api:latest
     networks:
       envoymesh:
         aliases:
