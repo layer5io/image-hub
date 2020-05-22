@@ -1,6 +1,6 @@
 global:
   image: nicholasjackson/consul-envoy:dev-dev
-  imageK8S: nicholasjackson/consul-k8s-dev:dev
+  imageK8S: nicholasjackson/consul-k8s-dev:latest
 
 # Available parameters and their default values for the Consul chart.
 # Server, when enabled, configures a server cluster to run. This should
@@ -41,7 +41,7 @@ ui:
   # balancer (for supported K8S installations) to access the UI.
   service:
     enabled: true
-    type: 'NodePort'
+    type: 'LoadBalancer'
 
 # ConnectInject will enable the automatic Connect sidecar injector.
 connectInject:
@@ -60,4 +60,4 @@ connectInject:
     defaultProtocol: "http"
 
     # Specify a container which has Envoy and any referenced filters
-  imageEnvoy: "kanishkarj/envoy-wasm-filter:dev"
+  imageEnvoy: "kanishkarj/envoy-wasm-filter:latest"

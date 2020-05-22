@@ -9,8 +9,6 @@
 import axios from 'axios';
 
 const REQ_CNT = 500;
-// const BASE = "http://0.0.0.0:9091"
-const BASE = "/api"
 
 export default {
     created() {
@@ -21,7 +19,7 @@ export default {
             return
         }
         let userObj = JSON.parse(atob(token))
-        axios.get(BASE + "/hello", {
+        axios.get(this.$BASE_URL + "/hello", {
             headers: {
                 Authorization: token
             }
@@ -45,7 +43,7 @@ export default {
         let pArr = []
         let token = localStorage.getItem("token")
         for (let i = 0; i < REQ_CNT; i++) {
-            pArr.push(axios.get(BASE + "/hello", {
+            pArr.push(axios.get(this.$BASE_URL + "/hello", {
             headers: {
                 Authorization: token
             }

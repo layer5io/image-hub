@@ -14,12 +14,10 @@ type User struct {
 	Plan     string
 }
 
-var DB = []User{}
+var DB = map[string]User{}
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Our middleware logic goes here...
-		// Set CORS headers for the preflight request
 		if r.Method == http.MethodOptions {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "*")
@@ -28,7 +26,6 @@ func CORSMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		// Set CORS headers for the main request.
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		next.ServeHTTP(w, r)
 	})
@@ -55,18 +52,53 @@ func auth(w http.ResponseWriter, req *http.Request) {
 	}
 	username := mp["username"]
 	password := mp["password"]
-	var matchedUser User
-	for _, item := range DB {
-		if item.Username == username && item.Password == password {
-			matchedUser.Username = username
-			matchedUser.Plan = item.Plan
-		}
-	}
-	fmt.Printf("2 %v", matchedUser)
-	if matchedUser.Username == "" {
+	matchedUser, ok := DB[username]
+
+	if !ok || matchedUser.Password != password {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	token, err := json.Marshal(&map[string]string{
+		"username": matchedUser.Username,
+		"plan":     matchedUser.Plan,
+	})
+
+	fmt.Printf("3 %v", string(token))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"token": base64.RawStdEncoding.EncodeToString(token),
+	})
+}
+
+func upgrade(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	data, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var mp map[string]string
+	err = json.Unmarshal(data, &mp)
+	fmt.Printf("1 %v", mp)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	username := mp["username"]
+	matchedUser, ok := DB[username]
+
+	fmt.Printf("3 %v %v", matchedUser, ok)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	matchedUser.Plan = mp["plan"]
 
 	token, err := json.Marshal(&map[string]string{
 		"username": matchedUser.Username,
@@ -103,7 +135,7 @@ func signup(w http.ResponseWriter, req *http.Request) {
 		Password: mp["password"],
 		Plan:     mp["plan"],
 	}
-	DB = append(DB, newUser)
+	DB[mp["username"]] = newUser
 }
 
 func main() {
@@ -111,5 +143,6 @@ func main() {
 	mux.Handle("/hello", CORSMiddleware(http.HandlerFunc(hello)))
 	mux.Handle("/auth", CORSMiddleware(http.HandlerFunc(auth)))
 	mux.Handle("/signup", CORSMiddleware(http.HandlerFunc(signup)))
+	mux.Handle("/upgrade", CORSMiddleware(http.HandlerFunc(upgrade)))
 	http.ListenAndServe(":9091", mux)
 }

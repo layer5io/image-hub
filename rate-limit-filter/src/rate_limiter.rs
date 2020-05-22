@@ -41,18 +41,21 @@ impl RateLimiter {
         let encoded: Vec<u8> = bincode::serialize(&target).unwrap();
         proxy_wasm::hostcalls::set_shared_data(&self.key.clone(), Some(&encoded), None);
     }
-    pub fn update(&mut self, time: i32) -> bool {
+    pub fn update(&mut self, time: i32) -> i32 {
         if self.Min != time {
             self.Min = time;
             self.Count = 0;
         }
         self.Count += 1;
+        proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", self.Count).as_str());
         if let Some(sm) = self.RPM {
             if self.Count > sm {
-                return false
+                return 0
+            } else {
+                return (sm - self.Count) as i32
             }
+        } else {
+            return -1;
         }
-        proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", self.Count).as_str());
-        true
     }
 }

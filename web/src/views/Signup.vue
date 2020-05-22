@@ -76,9 +76,6 @@
 // import HelloWorld from './components/HelloWorld';
 import axios from 'axios';
 
-// const BASE = "http://0.0.0.0:9091"
-const BASE = "/api"
-
 export default {
   name: 'App',
   created() {
@@ -96,7 +93,7 @@ export default {
   }),
   methods: {
     signup: function () {
-      axios.post(BASE + "/signup",{
+      axios.post(this.$BASE_URL + "/signup",{
         username: this.username,
         password: this.password,
         plan: this.select

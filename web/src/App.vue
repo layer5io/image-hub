@@ -16,7 +16,7 @@
       <v-spacer></v-spacer>
       <router-link :to="{name: 'Signup'}">
       <v-btn text>
-        Signin
+        Sign Up
       </v-btn>
         </router-link>
       <router-link :to="{name: 'Auth'}">

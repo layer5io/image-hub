@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: kanishkarj/dockercon-2020-web:dev
+        image: kanishkarj/dockercon-2020-web:latest
         ports:
         - containerPort: 8080
         env:
@@ -82,7 +82,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: kanishkarj/dockercon-2020-api:dev
+        image: kanishkarj/dockercon-2020-api:latest
         ports:
         - containerPort: 9091
         env:

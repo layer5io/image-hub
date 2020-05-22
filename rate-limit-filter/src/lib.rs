@@ -28,7 +28,7 @@ impl UpstreamCall {
     }
 }
 
-static ALLOWED_PATHS: [&str; 2] = ["/auth","/signup"];
+static ALLOWED_PATHS: [&str; 3] = ["/auth","/signup","/upgrade"];
 static CORS_HEADERS: [(&str,&str);5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
@@ -69,7 +69,8 @@ impl HttpContext for UpstreamCall {
                 let mn = (tm.as_secs()/60)%60;
                 let sc = tm.as_secs()%60;
                 let mut rl = RateLimiter::get(obj.username, obj.plan);
-                        if !rl.update(mn as i32) {
+                let lim = rl.update(mn as i32);        
+                if lim == 0  {
                             self.send_http_response(
                                 429,
                                 CORS_HEADERS.to_vec(),
