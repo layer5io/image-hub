@@ -12,8 +12,8 @@
 import axios from 'axios';
 
 const REQ_CNT = 500;
-// const BASE = "http://0.0.0.0:9091"
-const BASE = "/api"
+const BASE = "http://0.0.0.0:9091"
+// const BASE = "/api"
 
 export default {
     created() {
@@ -29,7 +29,11 @@ export default {
             console.log(res)
         }).catch((res) => {
             console.log(res)
-            this.message = res.response.data
+            if (res.response.status == 429) {
+                this.message = "Limit Exceeded"
+            } else {
+                this.message = "Unauthorized"
+            }
         })
     },
     data: () => ({

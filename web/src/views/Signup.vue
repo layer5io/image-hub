@@ -55,11 +55,18 @@
                     prepend-icon="lock"
                     type="password"
                   ></v-text-field>
+
+                  <v-combobox
+                    v-model="select"
+                    :items="items"
+                    label="Select the appropriate plan : "
+                  ></v-combobox>
+                  
                 </v-form>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" @click="login">Login</v-btn>
+                <v-btn color="primary" @click="signup">Sign Up</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -84,15 +91,21 @@ export default {
   data: () => ({
     username: "",
     password: "",
+    select: "",
+    items: [
+      'Enterprise',
+      'Team',
+      'Personal',
+    ],
   }),
   methods: {
-    login: function () {
-      axios.post(BASE + "/auth",{
+    signup: function () {
+      axios.post(BASE + "/signup",{
         username: this.username,
-        password: this.password
+        password: this.password,
+        plan: this.select
       }).then((res) => {
         console.log(res)
-        localStorage.setItem("token", res.data["token"])
       }).catch((res) => {
         console.log(res)
       })

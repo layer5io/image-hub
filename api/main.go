@@ -14,19 +14,7 @@ type User struct {
 	Plan     string
 }
 
-var DB = [4]User{User{
-	Username: "Alice",
-	Password: "alice",
-	Plan:     "Enterprise",
-}, User{
-	Username: "Bob",
-	Password: "bob",
-	Plan:     "Team",
-}, User{
-	Username: "Eve",
-	Password: "eve",
-	Plan:     "Personal",
-}}
+var DB = []User{}
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -96,9 +84,32 @@ func auth(w http.ResponseWriter, req *http.Request) {
 	})
 }
 
+func signup(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	data, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var mp map[string]string
+	err = json.Unmarshal(data, &mp)
+	fmt.Printf("1 %v", mp)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	newUser := User{
+		Username: mp["username"],
+		Password: mp["password"],
+		Plan:     mp["plan"],
+	}
+	DB = append(DB, newUser)
+}
+
 func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/hello", CORSMiddleware(http.HandlerFunc(hello)))
 	mux.Handle("/auth", CORSMiddleware(http.HandlerFunc(auth)))
+	mux.Handle("/signup", CORSMiddleware(http.HandlerFunc(signup)))
 	http.ListenAndServe(":9091", mux)
 }

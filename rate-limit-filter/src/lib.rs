@@ -28,7 +28,7 @@ impl UpstreamCall {
     }
 }
 
-static ALLOWED_PATHS: [&str; 1] = ["/auth"];
+static ALLOWED_PATHS: [&str; 2] = ["/auth","/signup"];
 static CORS_HEADERS: [(&str,&str);5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
