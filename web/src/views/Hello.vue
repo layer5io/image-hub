@@ -2,9 +2,6 @@
     <v-app id="inspire">
         <h2>{{message}}</h2>
         <v-btn color="primary" @click="generateLoad">Generate Load</v-btn>
-        <router-link :to="{name: 'Auth'}">
-            <button id="myButton" class="foo bar">Go!</button>
-        </router-link>
     </v-app>
 </template>
 
@@ -12,13 +9,17 @@
 import axios from 'axios';
 
 const REQ_CNT = 500;
-const BASE = "http://0.0.0.0:9091"
-// const BASE = "/api"
+// const BASE = "http://0.0.0.0:9091"
+const BASE = "/api"
 
 export default {
     created() {
         console.log('Component has been created!');
         let token = localStorage.getItem("token")
+        if (token == null) {
+            this.message = "Unauthorized"
+            return
+        }
         let userObj = JSON.parse(atob(token))
         axios.get(BASE + "/hello", {
             headers: {

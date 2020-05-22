@@ -16,14 +16,14 @@ clean:
 	cargo clean
 
 build-web:
-	cd web && docker build -t layer5io/dockercon-2020-web:dev .
+	cd web && docker build -t kanishkarj/dockercon-2020-web:dev .
 
 build-api:
-	cd api && docker build -t layer5io/dockercon-2020-api:dev .
+	cd api && docker build -t kanishkarj/dockercon-2020-api:dev .
 
-build-envoy:
+build-envoy: build
 	cp rate-limit-filter/target/wasm32-unknown-unknown/release/rate_limit_filter.wasm envoy/rate_limit_filter.wasm
-	cd envoy && docker build -t nicholasjackson/example-wasm-filter:dev .
+	cd envoy && docker build -t kanishkarj/envoy-wasm-filter:dev .
 
 dev-run-api: build-api deploy
 

@@ -1,5 +1,4 @@
 <template>
-<v-app id="inspire">
     <v-content>
       <v-container
         class="fill-height"
@@ -20,7 +19,7 @@
                 dark
                 flat
               >
-                <v-toolbar-title>Login form</v-toolbar-title>
+                <v-toolbar-title>Login</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <!-- <v-tooltip bottom>
                   <template v-slot:activator="{ on }">
@@ -40,10 +39,9 @@
               <v-card-text>
                 <v-form>
                   <v-text-field
-                    label="Login"
-                    name="login"
+                    label="username"
+                    name="username"
                     v-model="username"
-                    prepend-icon="person"
                     type="text"
                   ></v-text-field>
 
@@ -52,7 +50,6 @@
                     label="Password"
                     name="password"
                     v-model="password"
-                    prepend-icon="lock"
                     type="password"
                   ></v-text-field>
                 </v-form>
@@ -66,15 +63,14 @@
         </v-row>
       </v-container>
     </v-content>
-  </v-app>
 </template>
 
 <script>
 // import HelloWorld from './components/HelloWorld';
 import axios from 'axios';
 
-const BASE = "http://0.0.0.0:9091"
-// const BASE = "/api"
+// const BASE = "http://0.0.0.0:9091"
+const BASE = "/api"
 
 export default {
   name: 'App',
@@ -93,6 +89,7 @@ export default {
       }).then((res) => {
         console.log(res)
         localStorage.setItem("token", res.data["token"])
+        this.$router.push({ name: 'Hello'})
       }).catch((res) => {
         console.log(res)
       })

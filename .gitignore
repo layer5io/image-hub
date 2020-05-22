@@ -1,3 +1,2 @@
 target
 Cargo.lock
-envoy/rate_limit_filter.wasm
