@@ -12,3 +12,7 @@
 
 ## Image Hub
 Image Hub is a sample application for exploring WebAssembly modules used as Envoy filters.
+
+
+## Presentations
+- [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html)
