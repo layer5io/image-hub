@@ -1,4 +1,4 @@
-<p style="text-align:center;"><a href="https://layer5.io/meshery"><img align="left" style="margin-bottom:20px;" src="layer5-image-hub.svg"  height="125px" /></a><h1>Layer5 Image Hub</h1></p>
+<p style="text-align:center;"><a href="https://layer5.io/meshery"><img align="left" style="margin-bottom:20px;" src="img/readme/layer5-image-hub.svg"  height="125px" /></a><h1>Layer5 Image Hub</h1></p>
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/layer5io/image-hub)](https://goreportcard.com/report/github.com/layer5io/image-hub)
 [![GitHub](https://img.shields.io/github/license/layer5io/image-hub.svg)](LICENSE)
