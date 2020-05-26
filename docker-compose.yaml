@@ -1,0 +1,32 @@
+version: '2'
+services:
+
+  proxy:
+    build:
+      context: ./
+      dockerfile: envoy.Dockerfile
+    volumes:
+      - ./envoy.yaml:/etc/envoy.yaml
+      - ./rate-limit-filter/target/wasm32-unknown-unknown/release/rate_limit_filter.wasm:/etc/rate_limit_filter.wasm
+    networks:
+      - envoymesh
+    expose:
+      - "80"
+      - "8001"
+    ports:
+      - "9091:80"
+      - "18001:8001"
+
+  web_service:
+    image: kanishkarj/dockercon-2020-api:latest
+    networks:
+      envoymesh:
+        aliases:
+          - web_service
+    expose:
+      - "9091"
+    ports:
+      - "9000:9091"
+
+networks:
+  envoymesh: {}
