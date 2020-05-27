@@ -11,7 +11,7 @@
 <p align="center"><i>If you’re using the Image Hub or if you like other Layer5 projects, please <a href="https://github.com/layer5io/image-hub/stargazers">★</a> star this repository to show your support! 🤩</i></p>
 
 ## Image Hub
-Image Hub is a sample application written to run on [Consul](https://meshery.layer5.io/docs/service-meshes/adapters/consul) for exploring WebAssembly modules used as Envoy filters.
+Image Hub is a sample application written to run on [Consul](https://meshery.layer5.io/docs/service-meshes/adapters/consul) for exploring WebAssembly modules used as Envoy filters. This demo application has been enabled by experimental works of Nic Jackson of HashiCorp, and Kanishkar J and Lee Calcote of Layer5.
 
 ## Presentations
 - [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html)
