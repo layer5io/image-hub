@@ -2,10 +2,10 @@ mod rate_limiter;
 
 use proxy_wasm::traits::*;
 use proxy_wasm::types::*;
-use std::time::Duration;
 use rate_limiter::RateLimiter;
+use serde::{Deserialize, Serialize};
+use std::time::Duration;
 use std::time::SystemTime;
-use serde::{Serialize,Deserialize};
 
 #[no_mangle]
 pub fn _start() {
@@ -16,25 +16,21 @@ pub fn _start() {
 }
 
 #[derive(Debug)]
-struct UpstreamCall {
-
-}
+struct UpstreamCall {}
 
 impl UpstreamCall {
     fn new() -> Self {
-        return Self {
-
-        }
+        return Self {};
     }
 }
 
-static ALLOWED_PATHS: [&str; 3] = ["/auth","/signup","/upgrade"];
-static CORS_HEADERS: [(&str,&str);5] = [
+static ALLOWED_PATHS: [&str; 3] = ["/auth", "/signup", "/upgrade"];
+static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
     ("Access-Control-Allow-Methods", "*"),
     ("Access-Control-Allow-Headers", "*"),
-    ("Access-Control-Max-Age", "3600")   
+    ("Access-Control-Max-Age", "3600"),
 ];
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -47,17 +43,13 @@ impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
         if let Some(method) = self.get_http_request_header(":method") {
             if method == "OPTIONS" {
-                self.send_http_response(
-                    204,
-                    CORS_HEADERS.to_vec(),
-                    None,
-                );
-                return Action::Pause
+                self.send_http_response(204, CORS_HEADERS.to_vec(), None);
+                return Action::Pause;
             }
         }
         if let Some(path) = self.get_http_request_header(":path") {
             if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
-                return Action::Continue
+                return Action::Continue;
             }
         }
         if let Some(header) = self.get_http_request_header("Authorization") {
@@ -66,31 +58,23 @@ impl HttpContext for UpstreamCall {
                 proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", obj).as_str());
                 let curr = self.get_current_time();
                 let tm = curr.duration_since(SystemTime::UNIX_EPOCH).unwrap();
-                let mn = (tm.as_secs()/60)%60;
-                let sc = tm.as_secs()%60;
+                let mn = (tm.as_secs() / 60) % 60;
+                let sc = tm.as_secs() % 60;
                 let mut rl = RateLimiter::get(obj.username, obj.plan);
-                if !rl.update(mn as i32)  {
-                            self.send_http_response(
-                                429,
-                                CORS_HEADERS.to_vec(),
-                                Some(b"Limit exceeded.\n"),
-                            );
-                            rl.set();
-                            return Action::Pause
-                        }
-                    proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str());
+                if !rl.update(mn as i32) {
+                    self.send_http_response(429, CORS_HEADERS.to_vec(), Some(b"Limit exceeded.\n"));
                     rl.set();
-                    return Action::Continue
+                    return Action::Pause;
                 }
+                proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str());
+                rl.set();
+                return Action::Continue;
+            }
         }
-        self.send_http_response(
-            401,
-            CORS_HEADERS.to_vec(),
-            Some(b"Unauthorized\n"),
-        );
+        self.send_http_response(401, CORS_HEADERS.to_vec(), Some(b"Unauthorized\n"));
         Action::Pause
     }
-    
+
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str());
         Action::Continue
