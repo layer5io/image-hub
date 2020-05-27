@@ -11,6 +11,11 @@
         HUB
       </v-btn>
         </router-link>
+        <router-link :to="{name: 'Upgrade'}">
+      <v-btn text>
+        PLANS
+      </v-btn>
+        </router-link>
       </v-toolbar-title>
       
       <v-spacer></v-spacer>
