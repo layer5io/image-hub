@@ -16,35 +16,21 @@ clean:
 	cargo clean
 
 build-web:
-	cd web && docker build -t kanishkarj/dockercon-2020-web:latest .
+	cd web && docker build -t layer5/image-hub-web:latest .
 
 build-api:
-	cd api && docker build -t kanishkarj/dockercon-2020-api:latest .
+	cd api && docker build -t layer5/image-hub-api:latest .
 
 build-envoy: build
 	cp rate-limit-filter/target/wasm32-unknown-unknown/release/rate_limit_filter.wasm envoy/rate_limit_filter.wasm
-	cd envoy && docker build -t kanishkarj/envoy-wasm-filter:latest .
+	cd envoy && docker build -t layer5/image-hub-envoy:latest .
 
 dev-run-api: build-api deploy
 
 dev-run-web: 
 	cd web && yarn serve
-	
-cache-add:
-	minikube cache add nicholasjackson/consul-envoy:dev-dev
-	minikube cache add nicholasjackson/consul-k8s-dev:dev
-	minikube cache add nicholasjackson/example-wasm-filter:dev
-	minikube cache add layer5io/dockercon-2020-api:dev
-	minikube cache add layer5io/dockercon-2020-web:dev
 
-cache-delete:
-	minikube cache delete nicholasjackson/consul-envoy:dev-dev
-	minikube cache delete nicholasjackson/consul-k8s-dev:dev
-	minikube cache delete nicholasjackson/example-wasm-filter:dev
-	minikube cache delete layer5io/dockercon-2020-api:dev
-	minikube cache delete layer5io/dockercon-2020-web:dev
-	
 images-push:
-	docker push kanishkarj/dockercon-2020-web:latest
-	docker push kanishkarj/dockercon-2020-api:latest
-	docker push kanishkarj/envoy-wasm-filter:latest
+	docker push layer5/image-hub-web:latest
+	docker push layer5/image-hub-api:latest
+	docker push layer5/image-hub-envoy:latest

@@ -60,4 +60,4 @@ connectInject:
     defaultProtocol: "http"
 
     # Specify a container which has Envoy and any referenced filters
-  imageEnvoy: "kanishkarj/envoy-wasm-filter:latest"
+  imageEnvoy: "layer5/image-hub-web:latest"

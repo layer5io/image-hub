@@ -1,9 +1,9 @@
-use serde::{Serialize,Deserialize};
-use proxy_wasm; 
+use proxy_wasm;
 use proxy_wasm::traits::*;
 use proxy_wasm::types::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug,Serialize,Deserialize,Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RateLimiter {
     RPM: Option<u32>,
     Min: i32,
@@ -22,7 +22,7 @@ impl RateLimiter {
             RPM: limit,
             Min: -1,
             Count: 0,
-            key: key.clone()
+            key: key.clone(),
         }
     }
     pub fn get(key: String, plan: String) -> Self {
@@ -36,14 +36,14 @@ impl RateLimiter {
                         _ => None,
                     };
                     obj.RPM = limit;
-                    return obj
+                    return obj;
                 }
             }
         }
-        return Self::new(&key, &plan)
+        return Self::new(&key, &plan);
     }
     pub fn set(&self) {
-        let target: Option<Self>  = Some(self.clone());
+        let target: Option<Self> = Some(self.clone());
         let encoded: Vec<u8> = bincode::serialize(&target).unwrap();
         proxy_wasm::hostcalls::set_shared_data(&self.key.clone(), Some(&encoded), None);
     }
@@ -53,12 +53,15 @@ impl RateLimiter {
             self.Count = 0;
         }
         self.Count += 1;
-        proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?} {:?}", self.Count, self.RPM).as_str());
+        proxy_wasm::hostcalls::log(
+            LogLevel::Debug,
+            format!("Obj {:?} {:?}", self.Count, self.RPM).as_str(),
+        );
         if let Some(sm) = self.RPM {
             if self.Count > sm {
-                return false
+                return false;
             }
         }
-        return true
+        return true;
     }
 }
