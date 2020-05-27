@@ -20,7 +20,7 @@ Image Hub is a sample application written to run on [Consul](https://meshery.lay
 ![Service Mesh Architecture - Consul](img/readme/service-mesh-architecture-consul.png)
 
 ## Image Hub deployed on Consul
-
+![Meshery and WASM](img/readme/image-hub-on-consul-with-wasm-and-meshery.png)
 <div>&nbsp;</div>
 
 ## Join the service mesh community!
