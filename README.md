@@ -23,7 +23,7 @@ helm repo add hashicorp https://helm.releases.hashicorp.com # Adds helm hashicor
 helm install consul hashicorp/consul -f config/consul-values.yaml # Setup custom Consul with support for WASM
 ```
 
-2) Use Meshery to deploy the Image Hub sample application.
+2) Use [Meshery](https://github.com/layer5io/meshery) to deploy the Image Hub sample application.
 
 ## Presentations
 - [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html)
