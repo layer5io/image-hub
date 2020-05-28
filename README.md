@@ -13,13 +13,17 @@
 ## Image Hub
 Image Hub is a sample application written to run on [Consul](https://meshery.layer5.io/docs/service-meshes/adapters/consul) for exploring WebAssembly modules used as Envoy filters. This demo application has been enabled by experimental works of [Nic Jackson](https://twitter.com/sheriffjackson) of HashiCorp, and [Kanishkar J](https://twitter.com/_kanishkarj_), [Lee Calcote](https://twitter.com/lcalcote), and other contributors of Layer5.
 
-To deploy Image Hub on your cluster:
+
+Deployment Instructions \[pending https://github.com/layer5io/meshery-consul/issues/2\]:
+
+1) Deploy the latest Consul:
 
 ```bash
 helm repo add hashicorp https://helm.releases.hashicorp.com # Adds helm hashicorp repo
 helm install consul hashicorp/consul -f config/consul-values.yaml # Setup custom Consul with support for WASM
-kubectl apply -f config/image-hub.yaml 
 ```
+
+2) Use Meshery to deploy the Image Hub sample application.
 
 ## Presentations
 - [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html)
