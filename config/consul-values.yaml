@@ -41,7 +41,7 @@ ui:
   # balancer (for supported K8S installations) to access the UI.
   service:
     enabled: true
-    type: 'LoadBalancer'
+    type: 'NodePort'
 
 # ConnectInject will enable the automatic Connect sidecar injector.
 connectInject:
@@ -60,4 +60,4 @@ connectInject:
     defaultProtocol: "http"
 
     # Specify a container which has Envoy and any referenced filters
-  imageEnvoy: "layer5/image-hub-web:latest"
+  imageEnvoy: "layer5/image-hub-envoy:latest"
