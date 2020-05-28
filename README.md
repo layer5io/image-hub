@@ -14,7 +14,7 @@
 Image Hub is a sample application written to run on [Consul](https://meshery.layer5.io/docs/service-meshes/adapters/consul) for exploring WebAssembly modules used as Envoy filters. This demo application has been enabled by experimental works of [Nic Jackson](https://twitter.com/sheriffjackson) of HashiCorp, and [Kanishkar J](https://twitter.com/_kanishkarj_), [Lee Calcote](https://twitter.com/lcalcote), and other contributors of Layer5.
 
 
-Deployment Instructions (pending [meshery-consul/issues/2](https://github.com/layer5io/meshery-consul/issues/2)):
+### Deployment Instructions (pending [meshery-consul/issues/2](https://github.com/layer5io/meshery-consul/issues/2)):
 
 1) Deploy the latest Consul:
 
@@ -23,7 +23,28 @@ helm repo add hashicorp https://helm.releases.hashicorp.com # Adds helm hashicor
 helm install consul hashicorp/consul -f config/consul-values.yaml # Setup custom Consul with support for WASM
 ```
 
-2) Use [Meshery](https://github.com/layer5io/meshery) to deploy the Image Hub sample application.
+2) Use [Meshery](https://github.com/layer5io/meshery) to deploy the Image Hub sample application onto the Consul service mesh.
+
+### Use Image Hub
+
+1. Find the port assigned to the `ingess` service:
+
+```
+kubectl get svc ingess
+NAME     TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+ingess   NodePort   10.97.34.25   <none>        80:31118/TCP   27m
+```
+
+1. Open http://localhost:31118 (where 31118 is your environment's port number).
+1. Test your ability to "pull" an image (images are not in fact pulled, but an HTTP request is sent to the backend `api`). You should not be able to pull an image.
+1. Sign up a new user and select a subscription plan.
+1. Login as that user.
+1. Test your ability to "pull" an image. You should be able to pull an image.
+1. Open Meshery's performance management page (http://localhost:9081/performance)
+1. Configure a performance test against http://x.x.x.x:31118/api/pull (where x.x.x.x is your machine's host IP address, not "localhost")
+1. Enter `{ "authorization" : "<your user's token>" }`
+1. Run the performance test. See that your subscription plan limit is enforced accordingly.
+1. Change your subscription plan and retest.
 
 ## Presentations
 - [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html)
