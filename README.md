@@ -14,7 +14,7 @@
 Image Hub is a sample application written to run on [Consul](https://meshery.layer5.io/docs/service-meshes/adapters/consul) for exploring WebAssembly modules used as Envoy filters. This demo application has been enabled by experimental works of [Nic Jackson](https://twitter.com/sheriffjackson) of HashiCorp, and [Kanishkar J](https://twitter.com/_kanishkarj_), [Lee Calcote](https://twitter.com/lcalcote), and other contributors of Layer5.
 
 
-Deployment Instructions \[pending https://github.com/layer5io/meshery-consul/issues/2\]:
+Deployment Instructions (pending [meshery-consul/issues/2](https://github.com/layer5io/meshery-consul/issues/2)):
 
 1) Deploy the latest Consul:
 
