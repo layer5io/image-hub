@@ -50,7 +50,7 @@ ingess   NodePort   10.97.34.25   <none>        80:31118/TCP   27m
 
 <a href="https://www.youtube.com/watch?v=5BrbbKZOctw&list=PL3A-A6hPO2IN_HSU0pSfijBboiHggs5mC&index=4&t=0s"><img alt="DockerCon'2020" src="docs/assets/img/readme/docker-con-2020.png"  style="margin: 10px auto;"/></a>
 
-- [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html)
+- [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html) | ([video](https://www.youtube.com/watch?v=5BrbbKZOctw&list=PL3A-A6hPO2IN_HSU0pSfijBboiHggs5mC&index=4&t=0s)
 
 ## Consul Service Mesh Architecture w/WebAssembly
 ![Service Mesh Architecture - Consul](img/readme/service-mesh-architecture-consul.png)
