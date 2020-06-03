@@ -1,10 +1,12 @@
-# FROM node:alpine as build
+FROM jibbow/rust-wasm32-unknown-unknown as build
 
-# RUN mkdir /app
-# COPY . /app
-# WORKDIR /app
+# RUN rustup target add wasm32-unknown-unknown
 
-# RUN npm install && npm run asbuild
+RUN mkdir /app
+COPY . /app
+WORKDIR /app
+
+RUN  cargo +nightly build --target=wasm32-unknown-unknown --release
 
 # Current dev build of Envoy only supports systems with glibC
 FROM ubuntu:latest
@@ -18,4 +20,4 @@ COPY ./envoy ./
 RUN mv ./envoy /usr/local/bin/envoy && chmod +x /usr/local/bin/envoy
 
 # Copy your compiled filter to the container
-COPY ./rate_limit_filter.wasm /filters/optimized.wasm
+COPY --from=0 /app/target/wasm32-unknown-unknown/release/rate_limit_filter.wasm /filters/optimized.wasm
