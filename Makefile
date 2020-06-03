@@ -1,3 +1,5 @@
+VER=$(shell git rev-parse --short HEAD)
+
 build:
 	cd rate-limit-filter && cargo +nightly build --target=wasm32-unknown-unknown --release 
 
@@ -16,13 +18,13 @@ clean:
 	cargo clean
 
 build-web:
-	cd web && docker build -t layer5/image-hub-web:latest .
+	cd web && docker build -t layer5/image-hub-web:latest -t layer5/image-hub-web:$(VER) .
 
 build-api:
-	cd api && docker build -t layer5/image-hub-api:latest .
+	cd api && docker build -t layer5/image-hub-api:latest -t layer5/image-hub-api:$(VER) .
 
 build-envoy:
-	cd rate-limit-filter && docker build -t layer5/image-hub-envoy:latest .
+	cd envoy && docker build -t layer5/image-hub-envoy:latest -t layer5/image-hub-envoy:$(VER) .
 
 dev-run-api: build-api deploy
 
@@ -30,6 +32,7 @@ dev-run-web:
 	cd web && yarn serve
 
 images-push:
-	docker push layer5/image-hub-web:latest
-	docker push layer5/image-hub-api:latest
-	docker push layer5/image-hub-envoy:latest
+	docker push layer5/image-hub-web:latest layer5/image-hub-web:$(VER)
+	docker push layer5/image-hub-api:latest layer5/image-hub-api:$(VER)
+	docker push layer5/image-hub-envoy:latest layer5/image-hub-envoy:$(VER)
+

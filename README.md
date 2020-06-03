@@ -46,14 +46,19 @@ ingess   NodePort   10.97.34.25   <none>        80:31118/TCP   27m
 1. Run the performance test. See that your subscription plan limit is enforced accordingly.
 1. Change your subscription plan and retest.
 
-## Presentations
-- [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html)
+## Architecture
 
-## Consul Service Mesh Architecture w/WebAssembly
+### Consul Service Mesh Architecture w/WebAssembly
 ![Service Mesh Architecture - Consul](img/readme/service-mesh-architecture-consul.png)
 
-## Image Hub deployed on Consul
+### Image Hub deployed on Consul
 ![Meshery and WASM](img/readme/image-hub-on-consul-with-wasm-and-meshery.png)
+
+## Presentations
+
+<a href="https://www.youtube.com/watch?v=5BrbbKZOctw&list=PL3A-A6hPO2IN_HSU0pSfijBboiHggs5mC&index=4&t=0s"><img alt="DockerCon'2020" src="docs/assets/img/readme/docker-con-2020.png"  style="margin: 10px auto;"/></a>
+
+- [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html) | ([video](https://www.youtube.com/watch?v=5BrbbKZOctw&list=PL3A-A6hPO2IN_HSU0pSfijBboiHggs5mC&index=4&t=0s)
 
 <div>&nbsp;</div>
 
