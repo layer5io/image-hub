@@ -10,7 +10,7 @@ WORKDIR /app
 COPY . .
 
 # install dependencies and build app for production with minification
-RUN npm run install
+RUN npm install
 RUN npm run build
 
 EXPOSE 8080

@@ -1,6 +1,8 @@
-FROM jibbow/rust-wasm32-unknown-unknown as build
 
-# RUN rustup target add wasm32-unknown-unknown
+FROM rustlang/rust:nightly as build
+
+RUN rustup default nightly
+RUN rustup target add wasm32-unknown-unknown
 
 RUN mkdir /app
 COPY . /app
