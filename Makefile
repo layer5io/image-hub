@@ -23,8 +23,7 @@ build-web:
 build-api:
 	cd api && docker build -t layer5/image-hub-api:latest -t layer5/image-hub-api:$(VER) .
 
-build-envoy: build
-	cp rate-limit-filter/target/wasm32-unknown-unknown/release/rate_limit_filter.wasm envoy/rate_limit_filter.wasm
+build-envoy:
 	cd envoy && docker build -t layer5/image-hub-envoy:latest -t layer5/image-hub-envoy:$(VER) .
 
 dev-run-api: build-api deploy
