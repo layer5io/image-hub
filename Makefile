@@ -32,7 +32,7 @@ dev-run-web:
 	cd web && yarn serve
 
 docker-login:
-        docker login --username=$(DOCKER_USERNAME) --password=$(DOCKER_PASSWORD)
+  docker login --username=$(DOCKER_USERNAME) --password=$(DOCKER_PASSWORD)
 
 images-push:
 	docker push layer5/image-hub-web:latest layer5/image-hub-web:$(VER)
