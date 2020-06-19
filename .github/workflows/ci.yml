@@ -28,7 +28,7 @@ jobs:
     - name: Docker build & push - envoy
       if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master') && success()
       run: |
-        cat rate-limit-filter && DOCKER_BUILDKIT=1 docker build --no-cache -t layer5/image-hub-envoy .
+        cd rate-limit-filter && DOCKER_BUILDKIT=1 docker build --no-cache -t layer5/image-hub-envoy .
         docker tag layer5/image-hub-envoy:latest layer5/image-hub-envoy:${GITHUB_SHA::8}
         docker push layer5/image-hub-envoy:${GITHUB_SHA::8}
         docker push layer5/image-hub-envoy:latest
