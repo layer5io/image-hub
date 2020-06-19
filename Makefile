@@ -31,9 +31,6 @@ dev-run-api: build-api deploy
 dev-run-web: 
 	cd web && yarn serve
 
-docker-login:
-	docker login --username=$(DOCKER_USERNAME) --password=$(DOCKER_PASSWORD)
-
 image-push-latest:
 	docker push layer5/image-hub-web:latest
 	docker push layer5/image-hub-api:latest
