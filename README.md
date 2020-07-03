@@ -13,29 +13,59 @@
 ## Image Hub
 Image Hub is a sample application written to run on [Consul](https://meshery.layer5.io/docs/service-meshes/adapters/consul) for exploring WebAssembly modules used as Envoy filters. This demo application has been enabled by experimental works of [Nic Jackson](https://twitter.com/sheriffjackson) of HashiCorp, and [Kanishkar J](https://twitter.com/_kanishkarj_), [Lee Calcote](https://twitter.com/lcalcote), and other contributors of Layer5.
 
-To deploy Image Hub on your cluster:
+
+### Deployment Instructions (pending [meshery-consul/issues/2](https://github.com/layer5io/meshery-consul/issues/2)):
+
+1) Deploy the latest Consul:
 
 ```bash
 helm repo add hashicorp https://helm.releases.hashicorp.com # Adds helm hashicorp repo
 helm install consul hashicorp/consul -f config/consul-values.yaml # Setup custom Consul with support for WASM
-kubectl apply -f config/image-hub.yaml 
 ```
 
-## Presentations
-- [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html)
+2) Use [Meshery](https://github.com/layer5io/meshery) to deploy the Image Hub sample application onto the Consul service mesh.
 
-## Consul Service Mesh Architecture w/WebAssembly
+### Use Image Hub
+
+1. Find the port assigned to the `ingess` service:
+
+```
+kubectl get svc ingess
+NAME     TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+ingess   NodePort   10.97.34.25   <none>        80:31118/TCP   27m
+```
+
+1. Open http://localhost:31118 (where 31118 is your environment's port number).
+1. Test your ability to "pull" an image (images are not in fact pulled, but an HTTP request is sent to the backend `api`). You should not be able to pull an image.
+1. Sign up a new user and select a subscription plan.
+1. Login as that user.
+1. Test your ability to "pull" an image. You should be able to pull an image.
+1. Open Meshery's performance management page (http://localhost:9081/performance)
+1. Configure a performance test against http://x.x.x.x:31118/api/pull (where x.x.x.x is your machine's host IP address, not "localhost")
+1. Enter `{ "authorization" : "<your user's token>" }`
+1. Run the performance test. See that your subscription plan limit is enforced accordingly.
+1. Change your subscription plan and retest.
+
+## Architecture
+
+### Consul Service Mesh Architecture w/WebAssembly
 ![Service Mesh Architecture - Consul](img/readme/service-mesh-architecture-consul.png)
 
-## Image Hub deployed on Consul
+### Image Hub deployed on Consul
 ![Meshery and WASM](img/readme/image-hub-on-consul-with-wasm-and-meshery.png)
+
+## Presentations
+
+<a href="https://www.youtube.com/watch?v=5BrbbKZOctw&list=PL3A-A6hPO2IN_HSU0pSfijBboiHggs5mC&index=4&t=0s"><img alt="DockerCon'2020" src="docs/assets/img/readme/docker-con-2020.png"  style="margin: 10px auto;"/></a>
+
+- [DockerCon 2020](https://docker.events.cube365.net/docker/dockercon/content/Videos/63TCCNpzDC7Xxnm8b) | [deck](https://calcotestudios.com/talks/decks/slides-dockercon-2020-service-meshing-with-docker-desktop-and-webassembly.html) | ([video](https://www.youtube.com/watch?v=5BrbbKZOctw&list=PL3A-A6hPO2IN_HSU0pSfijBboiHggs5mC&index=4&t=0s)
 
 <div>&nbsp;</div>
 
 ## Join the service mesh community!
 
 <a name="contributing"></a><a name="community"></a>
-Our projects are community-built and welcome collaboration. 👍 Be sure to see the <a href="https://docs.google.com/document/d/17OPtDE_rdnPQxmk2Kauhm3GwXF1R5dZ3Cj8qZLKdo5E/edit">Meshery Contributors Welcome Guide</a> for a tour of resources available to you and jump into our <a href="http://slack.layer5.io">Slack</a>!
+Our projects are community-built and welcome collaboration. 👍 Be sure to see the <a href="https://docs.google.com/document/d/17OPtDE_rdnPQxmk2Kauhm3GwXF1R5dZ3Cj8qZLKdo5E/edit">Layer5 Contributor Welcome Guide</a> for a tour of resources available to you and jump into our <a href="http://slack.layer5.io">Slack</a>!
 
 <a href="https://meshery.io/community"><img alt="Layer5 Service Mesh Community" src="img/readme/community.svg" style="margin-left:10px;padding-top:5px;" width="110px" align="right" /></a>
 

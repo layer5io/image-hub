@@ -14,4 +14,3 @@ jobs:
       uses: pullreminders/slack-action@master
       with:
         args: '{\"channel\":\"CSK7N9TGX\",\"text\":\"Someone just starred Image Hub! (https://github.com/layer5io/image-hub/stargazers) Total ⭐️: ${{env.STARS}}\"}'
-
