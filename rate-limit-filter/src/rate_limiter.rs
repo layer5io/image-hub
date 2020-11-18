@@ -1,27 +1,27 @@
 use proxy_wasm;
-use proxy_wasm::traits::*;
+
 use proxy_wasm::types::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RateLimiter {
-    RPM: Option<u32>,
-    Min: i32,
-    Count: u32,
+    rpm: Option<u32>,
+    min: i32,
+    count: u32,
     key: String,
 }
 
 impl RateLimiter {
     fn new(key: &String, plan: &String) -> Self {
         let limit = match plan.as_str() {
-            "Team" => Some(100),
-            "Personal" => Some(10),
+            "group" => Some(100),
+            "user" => Some(10),
             _ => None,
         };
         Self {
-            RPM: limit,
-            Min: -1,
-            Count: 0,
+            rpm: limit,
+            min: -1,
+            count: 0,
             key: key.clone(),
         }
     }
@@ -31,11 +31,11 @@ impl RateLimiter {
                 let data: Option<Self> = bincode::deserialize(&data).unwrap_or(None);
                 if let Some(mut obj) = data {
                     let limit = match plan.as_str() {
-                        "Team" => Some(100),
-                        "Personal" => Some(10),
+                        "group" => Some(100),
+                        "user" => Some(10),
                         _ => None,
                     };
-                    obj.RPM = limit;
+                    obj.rpm = limit;
                     return obj;
                 }
             }
@@ -45,20 +45,20 @@ impl RateLimiter {
     pub fn set(&self) {
         let target: Option<Self> = Some(self.clone());
         let encoded: Vec<u8> = bincode::serialize(&target).unwrap();
-        proxy_wasm::hostcalls::set_shared_data(&self.key.clone(), Some(&encoded), None);
+        proxy_wasm::hostcalls::set_shared_data(&self.key.clone(), Some(&encoded), None).ok();
     }
     pub fn update(&mut self, time: i32) -> bool {
-        if self.Min != time {
-            self.Min = time;
-            self.Count = 0;
+        if self.min != time {
+            self.min = time;
+            self.count = 0;
         }
-        self.Count += 1;
+        self.count += 1;
         proxy_wasm::hostcalls::log(
             LogLevel::Debug,
-            format!("Obj {:?} {:?}", self.Count, self.RPM).as_str(),
-        );
-        if let Some(sm) = self.RPM {
-            if self.Count > sm {
+            format!("Obj {:?} {:?}", self.count, self.rpm).as_str(),
+        ).ok();
+        if let Some(sm) = self.rpm {
+            if self.count > sm {
                 return false;
             }
         }

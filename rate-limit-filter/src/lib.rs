@@ -4,13 +4,13 @@ use proxy_wasm::traits::*;
 use proxy_wasm::types::*;
 use rate_limiter::RateLimiter;
 use serde::{Deserialize, Serialize};
-use std::time::Duration;
+
 use std::time::SystemTime;
 
 #[no_mangle]
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Info);
-    proxy_wasm::set_http_context(|context_id, root_context_id| -> Box<dyn HttpContext> {
+    proxy_wasm::set_http_context(|_context_id, _root_context_id| -> Box<dyn HttpContext> {
         Box::new(UpstreamCall::new())
     });
 }
@@ -24,7 +24,7 @@ impl UpstreamCall {
     }
 }
 
-static ALLOWED_PATHS: [&str; 3] = ["/auth", "/signup", "/upgrade"];
+static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
@@ -55,18 +55,18 @@ impl HttpContext for UpstreamCall {
         if let Some(header) = self.get_http_request_header("Authorization") {
             if let Ok(token) = base64::decode(header) {
                 let obj: Data = serde_json::from_slice(&token).unwrap();
-                proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", obj).as_str());
+                proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", obj).as_str()).ok();
                 let curr = self.get_current_time();
                 let tm = curr.duration_since(SystemTime::UNIX_EPOCH).unwrap();
                 let mn = (tm.as_secs() / 60) % 60;
-                let sc = tm.as_secs() % 60;
+                let _sc = tm.as_secs() % 60;
                 let mut rl = RateLimiter::get(obj.username, obj.plan);
                 if !rl.update(mn as i32) {
                     self.send_http_response(429, CORS_HEADERS.to_vec(), Some(b"Limit exceeded.\n"));
                     rl.set();
                     return Action::Pause;
                 }
-                proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str());
+                proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str()).ok();
                 rl.set();
                 return Action::Continue;
             }
@@ -76,7 +76,8 @@ impl HttpContext for UpstreamCall {
     }
 
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
-        proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str());
+        self.set_http_response_header("x-app-response", Some("reply from the filter"));
+        proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
 }
