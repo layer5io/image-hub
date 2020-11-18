@@ -24,7 +24,7 @@ impl UpstreamCall {
     }
 }
 
-static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/productpage"];
+static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
@@ -76,6 +76,7 @@ impl HttpContext for UpstreamCall {
     }
 
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
+        self.set_http_response_header("x-app-response", Some("reply from the filter"));
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
