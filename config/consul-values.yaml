@@ -1,6 +1,10 @@
 global:
+  datacenter: image-hub
   image: nicholasjackson/consul-envoy:dev-dev
   imageK8S: nicholasjackson/consul-k8s-dev:latest
+
+  # Specify a container which has Envoy and any referenced filters
+  imageEnvoy: "layer5/image-hub-envoy:latest"
 
 # Available parameters and their default values for the Consul chart.
 # Server, when enabled, configures a server cluster to run. This should
@@ -58,6 +62,3 @@ connectInject:
     # either through this setting or individual annotation, for a service to be
     # registered correctly. Valid values are "http", "http2", "grpc" and "tcp".
     defaultProtocol: "http"
-
-    # Specify a container which has Envoy and any referenced filters
-  imageEnvoy: "layer5/image-hub-envoy:latest"
