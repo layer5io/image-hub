@@ -5,10 +5,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RateLimiter {
-    rpm: Option<u32>,
-    min: i32,
-    count: u32,
-    key: String,
+    pub rpm: Option<u32>,
+    pub min: i32,
+    pub count: u32,
+    pub key: String,
 }
 
 impl RateLimiter {
@@ -32,9 +32,15 @@ impl RateLimiter {
                 let data: Option<Self> = bincode::deserialize(&data).unwrap_or(None);
                 if let Some(mut obj) = data {
                     let limit = match plan.as_str() {
+<<<<<<< refs/remotes/upstream/master
                         "Enterprise" => Some(100),
                         "Team" => Some(50),
                         "Personal" => Some(10),
+=======
+                        "enterprise" => Some(100),
+                        "team" => Some(50),
+                        "personal" => Some(10),
+>>>>>>> temp commit
                         _ => None,
                     };
                     obj.rpm = limit;
@@ -58,7 +64,8 @@ impl RateLimiter {
         proxy_wasm::hostcalls::log(
             LogLevel::Debug,
             format!("Obj {:?} {:?}", self.count, self.rpm).as_str(),
-        ).ok();
+        )
+        .ok();
         if let Some(sm) = self.rpm {
             if self.count > sm {
                 return false;
