@@ -14,28 +14,40 @@
 Image Hub is a sample application written to run on [Consul](https://meshery.layer5.io/docs/service-meshes/adapters/consul) for exploring WebAssembly modules used as Envoy filters. This demo application has been enabled by experimental works of [Nic Jackson](https://twitter.com/sheriffjackson) of HashiCorp, and [Kanishkar J](https://twitter.com/_kanishkarj_), [Lee Calcote](https://twitter.com/lcalcote), and other contributors of Layer5.
 
 
-### Deployment Instructions (pending [meshery-consul/issues/2](https://github.com/layer5io/meshery-consul/issues/2)):
+## Deployment Instructions:
+
+### Using Istio (pending [PR #196](https://github.com/layer5io/meshery-istio/pull/196)+release; clone and do make run for now):
+1) Use [Meshery](https://github.com/layer5io/meshery) to deploy [istio](https://github.com/layer5io/advanced-istio-service-mesh-workshop/blob/master/lab-1/README.md) and the Image Hub sample application (Management > Istio > Manage Sample Application Lifecycle > Image-Hub ) onto the Istio service mesh.
+2) To get the URL to access frontend ( of the form http://\<Istio-ingress IP>:<ingress_port> ), run the following command: 
+    ```
+    echo "http://$(kubectl get nodes --selector=kubernetes.io/role!=master -o jsonpath={.items[0].status.addresses[?\(@.type==\"InternalIP\"\)].address}):$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[1].nodePort}')/"
+    ```
+
+
+### Using Consul:
 
 1) Deploy the latest Consul:
 
-```bash
-helm repo add hashicorp https://helm.releases.hashicorp.com # Adds helm hashicorp repo
-helm install consul hashicorp/consul -f config/consul-values.yaml # Setup custom Consul with support for WASM
-```
+    ```bash
+    helm repo add hashicorp https://helm.releases.hashicorp.com # Adds helm hashicorp repo
+    helm install consul hashicorp/consul -f config/consul-values.yaml # Setup custom Consul with support for WASM
+    ```
 
 2) Use [Meshery](https://github.com/layer5io/meshery) to deploy the Image Hub sample application onto the Consul service mesh.
 
-### Use Image Hub
+3) Find the port assigned to the `ingess` service:
 
-1. Find the port assigned to the `ingess` service:
+    ```
+    kubectl get svc ingess
+    NAME     TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+    ingess   NodePort   10.97.34.25   <none>        80:31118/TCP   27m
+    ```
 
-```
-kubectl get svc ingess
-NAME     TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
-ingess   NodePort   10.97.34.25   <none>        80:31118/TCP   27m
-```
+4) Open http://localhost:31118 (where 31118 is your environment's port number).
 
-1. Open http://localhost:31118 (where 31118 is your environment's port number).
+## Use Image Hub
+
+
 1. Test your ability to "pull" an image (images are not in fact pulled, but an HTTP request is sent to the backend `api`). You should not be able to pull an image.
 1. Sign up a new user and select a subscription plan.
 1. Login as that user.
