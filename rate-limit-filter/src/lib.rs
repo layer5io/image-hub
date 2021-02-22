@@ -76,7 +76,7 @@ impl HttpContext for UpstreamCall {
     }
 
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
-        self.set_http_response_header("x-app-response", Some("reply from the filter"));
+        self.set_http_response_header("x-app-serving", Some("rate-limit-filter"));
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
