@@ -14,8 +14,9 @@ pub struct RateLimiter {
 impl RateLimiter {
     fn new(key: &String, plan: &String) -> Self {
         let limit = match plan.as_str() {
-            "group" => Some(100),
-            "user" => Some(10),
+            "Enterprise" => Some(100),
+            "Team" => Some(50),
+            "Personal" => Some(10),
             _ => None,
         };
         Self {
@@ -31,8 +32,9 @@ impl RateLimiter {
                 let data: Option<Self> = bincode::deserialize(&data).unwrap_or(None);
                 if let Some(mut obj) = data {
                     let limit = match plan.as_str() {
-                        "group" => Some(100),
-                        "user" => Some(10),
+                        "Enterprise" => Some(100),
+                        "Team" => Some(50),
+                        "Personal" => Some(10),
                         _ => None,
                     };
                     obj.rpm = limit;

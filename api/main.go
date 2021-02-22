@@ -33,7 +33,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 
 func hello(w http.ResponseWriter, req *http.Request) {
 	token := req.Header.Get("Authorization")
-	w.Write([]byte("Hello, " + token + ", welcome to dockercon 2020!"))
+	w.Write([]byte("Hello, " + token + ", welcome to Istiocon 2021!"))
 }
 
 func auth(w http.ResponseWriter, req *http.Request) {
