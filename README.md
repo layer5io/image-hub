@@ -18,9 +18,18 @@ Image Hub is a sample application written to run on [Consul](https://meshery.lay
 
 ### Using Istio (pending [PR #196](https://github.com/layer5io/meshery-istio/pull/196)+release; clone and do make run for now):
 1) Use [Meshery](https://github.com/layer5io/meshery) to deploy [istio](https://github.com/layer5io/advanced-istio-service-mesh-workshop/blob/master/lab-1/README.md) and the Image Hub sample application (Management > Istio > Manage Sample Application Lifecycle > Image-Hub ) onto the Istio service mesh.
-2) To get the URL to access frontend ( of the form http://\<Istio-ingress IP>:<ingress_port> ), run the following command: 
+2) To map `imagehub.meshery.io` to the appropriate IP, run the following command to add the appropriate entry in the `"\etc\hosts"` file: 
+
     ```
-    echo "http://$(kubectl get nodes --selector=kubernetes.io/role!=master -o jsonpath={.items[0].status.addresses[?\(@.type==\"InternalIP\"\)].address}):$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[1].nodePort}')/"
+    echo $(kubectl get nodes --selector=kubernetes.io/role!=master -o jsonpath={.items[0].status.addresses[?\(@.type==\"InternalIP\"\)].address})'    'imagehub.meshery.io | sudo tee -a /etc/hosts
+    ```
+3) To get the environment port, run the following command:
+    ```
+    echo $(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[1].nodePort}')
+    ```
+4) Access the web UI using:
+    ```
+    http://imagehub.meshery.io:<environment port>
     ```
 
 
