@@ -94,9 +94,9 @@ impl HttpContext for UpstreamCall {
                 }
                 proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str()).ok();
                 rl.set();
-                self.set_http_response_header("x-rate-limit", Some(&rl.count.to_string()));
-                self.set_http_response_header("x-app-user", Some(&rl.key));
-                self.send_http_response(100, CORS_HEADERS.to_vec(), Some(b"OK\n"));
+                //self.set_http_response_header("x-rate-limit", Some(&rl.count.to_string()));
+                //self.set_http_response_header("x-app-user", Some(&rl.key));
+                //self.send_http_response(200, CORS_HEADERS.to_vec(), Some(b"OK\n"));
                 return Action::Continue;
             }
         }
