@@ -32,9 +32,9 @@ impl RateLimiter {
                 let data: Option<Self> = bincode::deserialize(&data).unwrap_or(None);
                 if let Some(mut obj) = data {
                     let limit = match plan.as_str() {
-                        "Enterprise" => Some(100),
-                        "Team" => Some(50),
-                        "Personal" => Some(10),
+                        "enterprise" => Some(100),
+                        "team" => Some(50),
+                        "personal" => Some(10),
                         _ => None,
                     };
                     obj.rpm = limit;
