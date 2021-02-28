@@ -8,26 +8,42 @@ use serde::{Deserialize, Serialize};
 
 use std::time::SystemTime;
 
+/*
 #[no_mangle]
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Info);
     proxy_wasm::set_http_context(|_context_id, _root_context_id| -> Box<dyn HttpContext> {
         Box::new(UpstreamCall::new())
     });
+}*/
+
+#[no_mangle]
+pub fn _start() {
+    proxy_wasm::set_log_level(LogLevel::Trace);
+    proxy_wasm::set_root_context(|_| -> Box<dyn RootContext> { Box::new(UpstreamCallRoot{})});
+}
+
+struct UpstreamCallRoot{}
+
+impl Context for UpstreamCallRoot {}
+
+impl RootContext for UpstreamCallRoot {
+    fn get_type(&self) -> Option<ContextType> {
+        Some(ContextType::HttpContext)
+    }
+
+    fn create_http_context(&self, context_id: u32) -> Option<Box<dyn HttpContext>> {
+        Some(Box::new(UpstreamCall { context_id }))
+    }
 }
 
 #[derive(Debug)]
 struct UpstreamCall {
     //paths: Vec<String>,
+    context_id: u32,
 }
 
-impl UpstreamCall {
-    fn new() -> Self {
-        return Self {
-            //paths: retrieve().unwrap(),
-        };
-    }
-}
+impl UpstreamCall {}
 
 /*
 fn retrieve() -> Result<Vec<String>, Error> {
@@ -92,7 +108,7 @@ impl HttpContext for UpstreamCall {
                 if !rl.update(mn as i32) {
                     count = rl.count.to_string();
                     headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
-                    self.send_http_response(429, vec![("x-rate-limit", &count)], Some(b"Limit exceeded.\n"));
+                    self.send_http_response(429, headers, Some(b"Limit exceeded.\n"));
                     rl.set();
                     return Action::Pause;
                 }
