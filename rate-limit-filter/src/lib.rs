@@ -8,22 +8,13 @@ use serde::{Deserialize, Serialize};
 
 use std::time::SystemTime;
 
-/*
-#[no_mangle]
-pub fn _start() {
-    proxy_wasm::set_log_level(LogLevel::Info);
-    proxy_wasm::set_http_context(|_context_id, _root_context_id| -> Box<dyn HttpContext> {
-        Box::new(UpstreamCall::new())
-    });
-}*/
-
 #[no_mangle]
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Trace);
-    proxy_wasm::set_root_context(|_| -> Box<dyn RootContext> { Box::new(UpstreamCallRoot{})});
+    proxy_wasm::set_root_context(|_| -> Box<dyn RootContext> { Box::new(UpstreamCallRoot {}) });
 }
 
-struct UpstreamCallRoot{}
+struct UpstreamCallRoot {}
 
 impl Context for UpstreamCallRoot {}
 
@@ -72,6 +63,8 @@ struct Data {
     username: String,
     plan: String,
 }
+
+impl Context for UpstreamCall {}
 
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
@@ -130,11 +123,3 @@ impl HttpContext for UpstreamCall {
         Action::Continue
     }
 }
-
-impl UpstreamCall {
-    // fn retrieve_rl(&self) -> RateLimiter {
-    // }
-}
-
-impl Context for UpstreamCall {}
-impl RootContext for UpstreamCall {}
