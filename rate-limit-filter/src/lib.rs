@@ -86,20 +86,19 @@ impl HttpContext for UpstreamCall {
                 let _sc = tm.as_secs() % 60;
                 let mut rl = RateLimiter::get(obj.username, obj.plan);
 
-                let mut headers = CORS_HEADERS.to_vec();
-                let count: String;
+                let headers = CORS_HEADERS.to_vec();
 
                 if !rl.update(mn as i32) {
-                    count = rl.count.to_string();
-                    headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
+                    self.set_http_response_header("x-app-user", Some(&rl.key));
+                    self.set_http_response_header("x-rate-limit", Some(&rl.count.to_string()));
                     self.send_http_response(429, headers, Some(b"Limit exceeded.\n"));
                     rl.set();
                     return Action::Pause;
                 }
                 proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str()).ok();
-                count = rl.count.to_string();
                 rl.set();
-                headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
+                self.set_http_response_header("x-app-user", Some(&rl.key));
+                self.set_http_response_header("x-rate-limit", Some(&rl.count.to_string()));
                 return Action::Continue;
             }
         }
