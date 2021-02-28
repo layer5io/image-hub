@@ -92,7 +92,7 @@ impl HttpContext for UpstreamCall {
                 if !rl.update(mn as i32) {
                     count = rl.count.to_string();
                     headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
-                    self.send_http_response(429, headers, Some(b"Limit exceeded.\n"));
+                    self.send_http_response(429, vec![("x-rate-limit", &count)], Some(b"Limit exceeded.\n"));
                     rl.set();
                     return Action::Pause;
                 }
