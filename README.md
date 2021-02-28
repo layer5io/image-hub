@@ -56,8 +56,23 @@ Image Hub is a sample application written to run on [Consul](https://meshery.lay
 
 ## Use Image Hub
 
+1. Upon visiting the image-hub homepage, we would need to signup for an account! Go ahead and click the "Sign Up" button in the top right.
+1. Enter the login details, and select a plan; Personal gives you 10 pulls per minute, Team gives you 100 pulls per minute, and Enterprise will give you 1000 pulls per minute.
+1. After signing up, you should be redirected to the login page, where you can login and start using the sample app.
+1. On the main page, open up the network network tab, and reload the page. This will allow you to see the request-response of the app.
+1. Go ahead and click the download button a couple of times. You'll notice that there is nothing actually limiting you from crossing the number of pulls according to the plan you chose!
+1. Alternatively you could test the above by navigating to http://imagehub.meshery.io:<environment port>/pull, and then looking at the resquest-responses.
 
-1. Test your ability to "pull" an image (images are not in fact pulled, but an HTTP request is sent to the backend `api`). You should not be able to pull an image.
+## Deploying the Rate Limiter WASM Filter for Envoy
+
+1. Go back to Management > Istio and under "Apply Service Mesh Configuration" make sure to apply "Automatic Sidecar Injection"
+1. Open up a terminal, and run `kubectl get pods` to get a list of running pods. You should be able to see 2 pods, `web` and `api`. Now run 
+the command `kubectl delete pods <exact web pod name> <exact api pod name>`. This will cause kubernetes to respawn them with the updated configuration.
+1. Go back to Management > Istio and under "Apply Service Mesh Configuration", select the `Envoy Filter for Image Hub` option, and wait for a few seconds.
+
+## Use Image hub with a WASM filter
+
+1. Test your ability to "pull" an image (images are not in fact pulled, but an HTTP request is sent to the backend `api`). You would not be able to pull an image, and the response would say "unauthorized".
 1. Sign up a new user and select a subscription plan.
 1. Login as that user.
 1. Test your ability to "pull" an image. You should be able to pull an image.
