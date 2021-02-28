@@ -52,7 +52,7 @@ fn retrieve() -> Result<Vec<String>, Error> {
 static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
-    ("Access-Control-Allow-Origin", "*"),
+    ("Access-Control-Allow-Origin", "hello"),
     ("Access-Control-Allow-Methods", "*"),
     ("Access-Control-Allow-Headers", "*"),
     ("Access-Control-Max-Age", "3600"),
