@@ -86,8 +86,8 @@ impl HttpContext for UpstreamCall {
                 let _sc = tm.as_secs() % 60;
                 let mut rl = RateLimiter::get(obj.username, obj.plan);
                 if !rl.update(mn as i32) {
-                    self.set_http_response_header("x-rate-limit", Some(&rl.count.to_string()));
-                    self.set_http_response_header("x-app-user", Some(&rl.key));
+                    //self.set_http_response_header("x-rate-limit", Some(&rl.count.to_string()));
+                    //self.set_http_response_header("x-app-user", Some(&rl.key));
                     self.send_http_response(429, CORS_HEADERS.to_vec(), Some(b"Limit exceeded.\n"));
                     rl.set();
                     return Action::Pause;
