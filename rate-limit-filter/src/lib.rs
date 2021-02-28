@@ -100,7 +100,6 @@ impl HttpContext for UpstreamCall {
                 count = rl.count.to_string();
                 rl.set();
                 headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
-                self.send_http_response(200, headers, Some(b"All Good!\n"));
                 return Action::Continue;
             }
         }
