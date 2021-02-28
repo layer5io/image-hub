@@ -85,18 +85,22 @@ impl HttpContext for UpstreamCall {
                 let mn = (tm.as_secs() / 60) % 60;
                 let _sc = tm.as_secs() % 60;
                 let mut rl = RateLimiter::get(obj.username, obj.plan);
+
+                let mut headers = CORS_HEADERS.to_vec();
+                let count: String;
+
                 if !rl.update(mn as i32) {
-                    self.set_http_response_header("x-rate-limit", Some(&rl.count.to_string()));
-                    self.set_http_response_header("x-app-user", Some(&rl.key));
-                    self.send_http_response(429, CORS_HEADERS.to_vec(), Some(b"Limit exceeded.\n"));
+                    count = rl.count.to_string();
+                    headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
+                    self.send_http_response(429, headers, Some(b"Limit exceeded.\n"));
                     rl.set();
                     return Action::Pause;
                 }
                 proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str()).ok();
+                count = rl.count.to_string();
                 rl.set();
-                //self.set_http_response_header("x-rate-limit", Some(&rl.count.to_string()));
-                //self.set_http_response_header("x-app-user", Some(&rl.key));
-                //self.send_http_response(200, CORS_HEADERS.to_vec(), Some(b"OK\n"));
+                headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
+                self.send_http_response(100, headers, Some(b"All Good!\n"));
                 return Action::Continue;
             }
         }
