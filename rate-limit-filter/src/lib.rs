@@ -10,31 +10,24 @@ use std::time::SystemTime;
 
 #[no_mangle]
 pub fn _start() {
-    proxy_wasm::set_log_level(LogLevel::Trace);
-    proxy_wasm::set_root_context(|_| -> Box<dyn RootContext> { Box::new(UpstreamCallRoot {}) });
-}
-
-struct UpstreamCallRoot {}
-
-impl Context for UpstreamCallRoot {}
-
-impl RootContext for UpstreamCallRoot {
-    fn get_type(&self) -> Option<ContextType> {
-        Some(ContextType::HttpContext)
-    }
-
-    fn create_http_context(&self, context_id: u32) -> Option<Box<dyn HttpContext>> {
-        Some(Box::new(UpstreamCall { context_id }))
-    }
+    proxy_wasm::set_log_level(LogLevel::Info);
+    proxy_wasm::set_http_context(|_context_id, _root_context_id| -> Box<dyn HttpContext> {
+        Box::new(UpstreamCall::new())
+    });
 }
 
 #[derive(Debug)]
 struct UpstreamCall {
     //paths: Vec<String>,
-    context_id: u32,
 }
 
-impl UpstreamCall {}
+impl UpstreamCall {
+    fn new() -> Self {
+        return Self {
+            //paths: retrieve().unwrap(),
+        };
+    }
+}
 
 /*
 fn retrieve() -> Result<Vec<String>, Error> {
@@ -52,7 +45,7 @@ fn retrieve() -> Result<Vec<String>, Error> {
 static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
-    ("Access-Control-Allow-Origin", "hello"),
+    ("Access-Control-Allow-Origin", "*"),
     ("Access-Control-Allow-Methods", "*"),
     ("Access-Control-Allow-Headers", "*"),
     ("Access-Control-Max-Age", "3600"),
@@ -63,8 +56,6 @@ struct Data {
     username: String,
     plan: String,
 }
-
-impl Context for UpstreamCall {}
 
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
@@ -123,3 +114,11 @@ impl HttpContext for UpstreamCall {
         Action::Continue
     }
 }
+
+impl UpstreamCall {
+    // fn retrieve_rl(&self) -> RateLimiter {
+    // }
+}
+
+impl Context for UpstreamCall {}
+impl RootContext for UpstreamCall {}
