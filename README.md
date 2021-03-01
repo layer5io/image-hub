@@ -14,7 +14,9 @@
 Image Hub is a sample application written to run on [Consul](https://meshery.layer5.io/docs/service-meshes/adapters/consul) for exploring WebAssembly modules used as Envoy filters. This demo application has been enabled by experimental works of [Nic Jackson](https://twitter.com/sheriffjackson) of HashiCorp, and [Kanishkar J](https://twitter.com/_kanishkarj_), [Lee Calcote](https://twitter.com/lcalcote), and other contributors of Layer5.
 
 
-## Deployment Instructions:
+## Deployment Instructions
+
+Image Hub supports Envoy-based data planes. Deployment instructions for each supported service mesh are below.
 
 ### Using Istio (pending [PR #196](https://github.com/layer5io/meshery-istio/pull/196)+release; clone and do make run for now):
 1) Use [Meshery](https://github.com/layer5io/meshery) to deploy [istio](https://github.com/layer5io/advanced-istio-service-mesh-workshop/blob/master/lab-1/README.md) and the Image Hub sample application (Management > Istio > Manage Sample Application Lifecycle > Image-Hub ) onto the Istio service mesh.
