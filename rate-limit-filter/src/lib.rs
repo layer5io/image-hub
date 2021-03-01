@@ -1,5 +1,6 @@
 mod rate_limiter;
 
+//use postgres::{Client, Error, NoTls};
 use proxy_wasm::traits::*;
 use proxy_wasm::types::*;
 use rate_limiter::RateLimiter;
@@ -16,14 +17,31 @@ pub fn _start() {
 }
 
 #[derive(Debug)]
-struct UpstreamCall {}
+struct UpstreamCall {
+    //paths: Vec<String>,
+}
 
 impl UpstreamCall {
     fn new() -> Self {
-        return Self {};
+        return Self {
+            //paths: retrieve().unwrap(),
+        };
     }
 }
 
+/*
+fn retrieve() -> Result<Vec<String>, Error> {
+    let mut client = Client::connect("host=localhost user=postgres dbname=mesherydb", NoTls)?;
+    let array = client
+        .query("SELECT PathName FROM Paths", &[])?
+        .iter()
+        .map(|x| x.get(0))
+        .collect();
+    Ok(array)
+}
+*/
+
+//to be removed
 static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
@@ -52,6 +70,12 @@ impl HttpContext for UpstreamCall {
                 return Action::Continue;
             }
         }
+        /*
+        if let Some(path) = self.get_http_request_header(":path") {
+            if self.paths.binary_search(&path.to_string()).is_ok() {
+                return Action::Continue;
+            }
+        }*/
         if let Some(header) = self.get_http_request_header("Authorization") {
             if let Ok(token) = base64::decode(header) {
                 let obj: Data = serde_json::from_slice(&token).unwrap();
@@ -61,13 +85,22 @@ impl HttpContext for UpstreamCall {
                 let mn = (tm.as_secs() / 60) % 60;
                 let _sc = tm.as_secs() % 60;
                 let mut rl = RateLimiter::get(obj.username, obj.plan);
+
+                let mut headers = CORS_HEADERS.to_vec();
+                let count: String;
+
                 if !rl.update(mn as i32) {
-                    self.send_http_response(429, CORS_HEADERS.to_vec(), Some(b"Limit exceeded.\n"));
+                    count = rl.count.to_string();
+                    headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
+                    self.send_http_response(429, headers, Some(b"Limit exceeded.\n"));
                     rl.set();
                     return Action::Pause;
                 }
                 proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str()).ok();
+                count = rl.count.to_string();
                 rl.set();
+                headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
+                self.send_http_response(200, headers, Some(b"All Good!\n"));
                 return Action::Continue;
             }
         }

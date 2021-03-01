@@ -5,10 +5,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RateLimiter {
-    rpm: Option<u32>,
-    min: i32,
-    count: u32,
-    key: String,
+    pub rpm: Option<u32>,
+    pub min: i32,
+    pub count: u32,
+    pub key: String,
 }
 
 impl RateLimiter {
@@ -58,7 +58,8 @@ impl RateLimiter {
         proxy_wasm::hostcalls::log(
             LogLevel::Debug,
             format!("Obj {:?} {:?}", self.count, self.rpm).as_str(),
-        ).ok();
+        )
+        .ok();
         if let Some(sm) = self.rpm {
             if self.count > sm {
                 return false;

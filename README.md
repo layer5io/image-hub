@@ -14,29 +14,67 @@
 Image Hub is a sample application written to run on [Consul](https://meshery.layer5.io/docs/service-meshes/adapters/consul) for exploring WebAssembly modules used as Envoy filters. This demo application has been enabled by experimental works of [Nic Jackson](https://twitter.com/sheriffjackson) of HashiCorp, and [Kanishkar J](https://twitter.com/_kanishkarj_), [Lee Calcote](https://twitter.com/lcalcote), and other contributors of Layer5.
 
 
-### Deployment Instructions (pending [meshery-consul/issues/2](https://github.com/layer5io/meshery-consul/issues/2)):
+## Deployment Instructions
+
+Image Hub supports Envoy-based data planes. Deployment instructions for each supported service mesh are below.
+
+### Using Istio (pending [PR #196](https://github.com/layer5io/meshery-istio/pull/196)+release; clone and do make run for now):
+1) Use [Meshery](https://github.com/layer5io/meshery) to deploy [istio](https://github.com/layer5io/advanced-istio-service-mesh-workshop/blob/master/lab-1/README.md) and the Image Hub sample application (Management > Istio > Manage Sample Application Lifecycle > Image-Hub ) onto the Istio service mesh.
+2) To map `imagehub.meshery.io` to the appropriate IP, run the following command to add the appropriate entry in the `"\etc\hosts"` file: 
+
+    ```
+    echo $(kubectl get nodes --selector=kubernetes.io/role!=master -o jsonpath={.items[0].status.addresses[?\(@.type==\"InternalIP\"\)].address})'    'imagehub.meshery.io | sudo tee -a /etc/hosts
+    ```
+3) To get the environment port, run the following command:
+    ```
+    echo $(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[1].nodePort}')
+    ```
+4) Access the web UI using:
+    ```
+    http://imagehub.meshery.io:<environment port>
+    ```
+
+
+### Using Consul:
 
 1) Deploy the latest Consul:
 
-```bash
-helm repo add hashicorp https://helm.releases.hashicorp.com # Adds helm hashicorp repo
-helm install consul hashicorp/consul -f config/consul-values.yaml # Setup custom Consul with support for WASM
-```
+    ```bash
+    helm repo add hashicorp https://helm.releases.hashicorp.com # Adds helm hashicorp repo
+    helm install consul hashicorp/consul -f config/consul-values.yaml # Setup custom Consul with support for WASM
+    ```
 
 2) Use [Meshery](https://github.com/layer5io/meshery) to deploy the Image Hub sample application onto the Consul service mesh.
 
-### Use Image Hub
+3) Find the port assigned to the `ingess` service:
 
-1. Find the port assigned to the `ingess` service:
+    ```
+    kubectl get svc ingess
+    NAME     TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+    ingess   NodePort   10.97.34.25   <none>        80:31118/TCP   27m
+    ```
 
-```
-kubectl get svc ingess
-NAME     TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
-ingess   NodePort   10.97.34.25   <none>        80:31118/TCP   27m
-```
+4) Open http://localhost:31118 (where 31118 is your environment's port number).
 
-1. Open http://localhost:31118 (where 31118 is your environment's port number).
-1. Test your ability to "pull" an image (images are not in fact pulled, but an HTTP request is sent to the backend `api`). You should not be able to pull an image.
+## Use Image Hub
+
+1. Upon visiting the image-hub homepage, we would need to signup for an account! Go ahead and click the "Sign Up" button in the top right.
+1. Enter the login details, and select a plan; Personal gives you 10 pulls per minute, Team gives you 100 pulls per minute, and Enterprise will give you 1000 pulls per minute.
+1. After signing up, you should be redirected to the login page, where you can login and start using the sample app.
+1. On the main page, open up the network network tab, and reload the page. This will allow you to see the request-response of the app.
+1. Go ahead and click the download button a couple of times. You'll notice that there is nothing actually limiting you from crossing the number of pulls according to the plan you chose!
+1. Alternatively you could test the above by navigating to http://imagehub.meshery.io:<environment port>/pull, and then looking at the resquest-responses.
+
+## Deploying the Rate Limiter WASM Filter for Envoy
+
+1. Go back to Management > Istio and under "Apply Service Mesh Configuration" make sure to apply "Automatic Sidecar Injection"
+1. Open up a terminal, and run `kubectl get pods` to get a list of running pods. You should be able to see 2 pods, `web` and `api`. Now run 
+the command `kubectl delete pods <exact web pod name> <exact api pod name>`. This will cause kubernetes to respawn them with the updated configuration.
+1. Go back to Management > Istio and under "Apply Service Mesh Configuration", select the `Envoy Filter for Image Hub` option, and wait for a few seconds.
+
+## Use Image hub with a WASM filter
+
+1. Test your ability to "pull" an image (images are not in fact pulled, but an HTTP request is sent to the backend `api`). You would not be able to pull an image, and the response would say "unauthorized".
 1. Sign up a new user and select a subscription plan.
 1. Login as that user.
 1. Test your ability to "pull" an image. You should be able to pull an image.
