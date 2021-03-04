@@ -1,16 +1,22 @@
 mod rate_limiter;
+mod yaml_parse;
 
-//use postgres::{Client, Error, NoTls};
+use yaml_parse::JsonPath;
+
 use proxy_wasm::traits::*;
 use proxy_wasm::types::*;
 use rate_limiter::RateLimiter;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
+use std::fs::File;
+use std::io::BufReader;
+use std::path::Path;
 use std::time::SystemTime;
 
 #[no_mangle]
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Info);
+
     proxy_wasm::set_http_context(|_context_id, _root_context_id| -> Box<dyn HttpContext> {
         Box::new(UpstreamCall::new())
     });
@@ -18,31 +24,22 @@ pub fn _start() {
 
 #[derive(Debug)]
 struct UpstreamCall {
-    //paths: Vec<String>,
+    paths: Vec<JsonPath>,
 }
 
 impl UpstreamCall {
     fn new() -> Self {
-        return Self {
-            //paths: retrieve().unwrap(),
-        };
+        // Parsing JSON
+        let path = Path::new("filter.json");
+        let file = File::open(path).unwrap();
+        let reader = BufReader::new(file);
+        let json: Vec<JsonPath> = serde_json::from_reader(reader).unwrap();
+
+        Self { paths: json }
     }
 }
 
-/*
-fn retrieve() -> Result<Vec<String>, Error> {
-    let mut client = Client::connect("host=localhost user=postgres dbname=mesherydb", NoTls)?;
-    let array = client
-        .query("SELECT PathName FROM Paths", &[])?
-        .iter()
-        .map(|x| x.get(0))
-        .collect();
-    Ok(array)
-}
-*/
-
-//to be removed
-static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
+//static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
@@ -51,7 +48,7 @@ static CORS_HEADERS: [(&str, &str); 5] = [
     ("Access-Control-Max-Age", "3600"),
 ];
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 struct Data {
     username: String,
     plan: String,
@@ -59,23 +56,26 @@ struct Data {
 
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
+        let allowed_paths: Vec<String> = self.paths.iter().map(|e| e.name.clone()).collect();
+
         if let Some(method) = self.get_http_request_header(":method") {
             if method == "OPTIONS" {
                 self.send_http_response(204, CORS_HEADERS.to_vec(), None);
                 return Action::Pause;
             }
         }
+        /*
         if let Some(path) = self.get_http_request_header(":path") {
             if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
                 return Action::Continue;
             }
         }
-        /*
+        */
         if let Some(path) = self.get_http_request_header(":path") {
-            if self.paths.binary_search(&path.to_string()).is_ok() {
+            if allowed_paths.binary_search(&path.to_string()).is_ok() {
                 return Action::Continue;
             }
-        }*/
+        }
         if let Some(header) = self.get_http_request_header("Authorization") {
             if let Ok(token) = base64::decode(header) {
                 let obj: Data = serde_json::from_slice(&token).unwrap();

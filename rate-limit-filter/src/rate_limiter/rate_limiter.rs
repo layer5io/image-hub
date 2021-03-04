@@ -13,6 +13,7 @@ pub struct RateLimiter {
 
 impl RateLimiter {
     fn new(key: &String, plan: &String) -> Self {
+        // make these dynamic as well
         let limit = match plan.as_str() {
             "Enterprise" => Some(100),
             "Team" => Some(50),
