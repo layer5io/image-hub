@@ -72,7 +72,7 @@ impl HttpContext for UpstreamCall {
         }
         */
         if let Some(path) = self.get_http_request_header(":path") {
-            if allowed_paths.binary_search(&path.to_string()).is_ok() {
+            if allowed_paths.binary_search(&format!("/{}", &path)).is_ok() {
                 return Action::Continue;
             }
         }
