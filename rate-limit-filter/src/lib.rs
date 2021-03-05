@@ -75,7 +75,7 @@ impl HttpContext for UpstreamCall {
         }
         */
         if let Some(path) = self.get_http_request_header(":path") {
-            if allowed_paths.binary_search(&format!("/{}", &path)).is_ok() {
+            if allowed_paths.binary_search(&path).is_ok() {
                 return Action::Continue;
             }
         }
@@ -102,7 +102,11 @@ impl HttpContext for UpstreamCall {
                 proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str()).ok();
                 count = rl.count.to_string();
                 rl.set();
-                headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key),("json","parsed")]);
+                headers.append(&mut vec![
+                    ("x-rate-limit", &count),
+                    ("x-app-user", &rl.key),
+                    ("json", "parsed"),
+                ]);
                 self.send_http_response(200, headers, Some(b"All Good!\n"));
                 return Action::Continue;
             }
