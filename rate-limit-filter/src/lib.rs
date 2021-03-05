@@ -23,22 +23,22 @@ pub fn _start() {
 
 #[derive(Debug)]
 struct UpstreamCall {
-    data: Vec<JsonPath>,
-    paths: Vec<String>,
+    //data: Vec<JsonPath>,
+//paths: Vec<String>,
 }
 
 impl UpstreamCall {
     fn new() -> Self {
-        //Parsing JSON
+        /*Parsing JSON
         let file_path = Path::new("filter.json");
         let file = File::open(file_path).unwrap();
         let reader = BufReader::new(file);
         let json: Vec<JsonPath> = serde_json::from_reader(reader).unwrap();
         let path_vec = UpstreamCall::get_paths(&json);
-
+        */
         Self {
-            data: json,
-            paths: path_vec,
+            //data: json,
+            //paths: path_vec,
         }
     }
 
@@ -49,7 +49,7 @@ impl UpstreamCall {
     }
 }
 
-//static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
+static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
@@ -66,25 +66,29 @@ struct Data {
 
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
+        proxy_wasm::hostcalls::log(
+            LogLevel::Debug,
+            format!("Obj {:?}", self.get_configuration()).as_str(),
+        )
+        .ok();
         if let Some(method) = self.get_http_request_header(":method") {
             if method == "OPTIONS" {
                 self.send_http_response(204, CORS_HEADERS.to_vec(), None);
                 return Action::Pause;
             }
         }
-        /*
+
         if let Some(path) = self.get_http_request_header(":path") {
             if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
                 return Action::Continue;
             }
         }
-        */
+        /*
         if let Some(path) = self.get_http_request_header(":path") {
-            proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Paths: {:?},\n search: {:?}", self.paths,self.paths.binary_search(&path).is_ok()).as_str()).ok();
             if self.paths.binary_search(&path).is_ok() {
                 return Action::Continue;
             }
-        }
+        }*/
         if let Some(header) = self.get_http_request_header("Authorization") {
             if let Ok(token) = base64::decode(header) {
                 let obj: Data = serde_json::from_slice(&token).unwrap();
