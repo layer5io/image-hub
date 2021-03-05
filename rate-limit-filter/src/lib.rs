@@ -1,11 +1,11 @@
 mod rate_limiter;
 mod yaml_parse;
 
+use rate_limiter::RateLimiter;
 use yaml_parse::JsonPath;
 
 use proxy_wasm::traits::*;
 use proxy_wasm::types::*;
-use rate_limiter::RateLimiter;
 use serde::Deserialize;
 
 use std::fs::File;
@@ -28,13 +28,13 @@ struct UpstreamCall {
 
 impl UpstreamCall {
     fn new() -> Self {
-        // Parsing JSON
+        /* Parsing JSON
         let path = Path::new("filter.json");
         let file = File::open(path).unwrap();
         let reader = BufReader::new(file);
         let json: Vec<JsonPath> = serde_json::from_reader(reader).unwrap();
-
-        return Self { };
+        */
+        return Self {};
     }
 }
 
