@@ -22,20 +22,30 @@ pub fn _start() {
 }
 
 #[derive(Debug)]
-struct UpstreamCall {}
+struct UpstreamCall {
+    data: Vec<JsonPath>,
+    paths: Vec<String>,
+}
 
 impl UpstreamCall {
     fn new() -> Self {
-        return Self {};
-    }
-
-    fn parse_json() -> Vec<JsonPath> {
         //Parsing JSON
-        let path = Path::new("filter.json");
-        let file = File::open(path).unwrap();
+        let file_path = Path::new("filter.json");
+        let file = File::open(file_path).unwrap();
         let reader = BufReader::new(file);
         let json: Vec<JsonPath> = serde_json::from_reader(reader).unwrap();
-        json
+        let path_vec = UpstreamCall::get_paths(&json);
+
+        Self {
+            data: json,
+            paths: path_vec,
+        }
+    }
+
+    fn get_paths(json: &Vec<JsonPath>) -> Vec<String> {
+        let mut allowed_paths: Vec<String> = json.iter().map(|e| e.name.clone()).collect();
+        allowed_paths.sort();
+        allowed_paths
     }
 }
 
@@ -56,11 +66,6 @@ struct Data {
 
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
-        let allowed_paths: Vec<String> = UpstreamCall::parse_json()
-            .iter()
-            .map(|e| e.name.clone())
-            .collect();
-
         if let Some(method) = self.get_http_request_header(":method") {
             if method == "OPTIONS" {
                 self.send_http_response(204, CORS_HEADERS.to_vec(), None);
@@ -75,7 +80,7 @@ impl HttpContext for UpstreamCall {
         }
         */
         if let Some(path) = self.get_http_request_header(":path") {
-            if allowed_paths.binary_search(&path).is_ok() {
+            if self.paths.binary_search(&path).is_ok() {
                 return Action::Continue;
             }
         }
