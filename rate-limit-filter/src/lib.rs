@@ -102,7 +102,7 @@ impl HttpContext for UpstreamCall {
                 proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str()).ok();
                 count = rl.count.to_string();
                 rl.set();
-                headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
+                headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key),("json","parsed")]);
                 self.send_http_response(200, headers, Some(b"All Good!\n"));
                 return Action::Continue;
             }
