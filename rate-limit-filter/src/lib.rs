@@ -67,7 +67,7 @@ struct Data {
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
         proxy_wasm::hostcalls::log(
-            LogLevel::Debug,
+            LogLevel::Trace,
             format!("Obj {:?}", self.get_configuration()).as_str(),
         )
         .ok();
