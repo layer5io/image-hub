@@ -16,7 +16,6 @@ use std::time::SystemTime;
 #[no_mangle]
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Info);
-
     proxy_wasm::set_http_context(|_context_id, _root_context_id| -> Box<dyn HttpContext> {
         Box::new(UpstreamCall::new())
     });
@@ -35,7 +34,7 @@ impl UpstreamCall {
         let reader = BufReader::new(file);
         let json: Vec<JsonPath> = serde_json::from_reader(reader).unwrap();
 
-        Self { paths: json }
+        return Self { paths: json };
     }
 }
 
