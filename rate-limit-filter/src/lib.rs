@@ -22,23 +22,24 @@ pub fn _start() {
 }
 
 #[derive(Debug)]
-struct UpstreamCall {
-    //paths: Vec<JsonPath>,
-}
+struct UpstreamCall {}
 
 impl UpstreamCall {
     fn new() -> Self {
-        /* Parsing JSON
+        return Self {};
+    }
+
+    fn parse_json() -> Vec<JsonPath> {
+        //Parsing JSON
         let path = Path::new("filter.json");
         let file = File::open(path).unwrap();
         let reader = BufReader::new(file);
         let json: Vec<JsonPath> = serde_json::from_reader(reader).unwrap();
-        */
-        return Self {};
+        json
     }
 }
 
-static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
+//static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
@@ -55,7 +56,10 @@ struct Data {
 
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
-        //let allowed_paths: Vec<String> = self.paths.iter().map(|e| e.name.clone()).collect();
+        let allowed_paths: Vec<String> = UpstreamCall::parse_json()
+            .iter()
+            .map(|e| e.name.clone())
+            .collect();
 
         if let Some(method) = self.get_http_request_header(":method") {
             if method == "OPTIONS" {
@@ -63,18 +67,18 @@ impl HttpContext for UpstreamCall {
                 return Action::Pause;
             }
         }
+        /*
         if let Some(path) = self.get_http_request_header(":path") {
             if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
                 return Action::Continue;
             }
         }
-        /*
+        */
         if let Some(path) = self.get_http_request_header(":path") {
             if allowed_paths.binary_search(&format!("/{}", &path)).is_ok() {
                 return Action::Continue;
             }
         }
-        */
         if let Some(header) = self.get_http_request_header("Authorization") {
             if let Ok(token) = base64::decode(header) {
                 let obj: Data = serde_json::from_slice(&token).unwrap();
