@@ -80,6 +80,7 @@ impl HttpContext for UpstreamCall {
         }
         */
         if let Some(path) = self.get_http_request_header(":path") {
+            proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Paths: {:?},\n search: {:?}", self.paths,self.paths.binary_search(&path).is_ok()).as_str()).ok();
             if self.paths.binary_search(&path).is_ok() {
                 return Action::Continue;
             }
