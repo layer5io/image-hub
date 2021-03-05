@@ -23,7 +23,7 @@ pub fn _start() {
 
 #[derive(Debug)]
 struct UpstreamCall {
-    paths: Vec<JsonPath>,
+    //paths: Vec<JsonPath>,
 }
 
 impl UpstreamCall {
@@ -34,7 +34,7 @@ impl UpstreamCall {
         let reader = BufReader::new(file);
         let json: Vec<JsonPath> = serde_json::from_reader(reader).unwrap();
 
-        return Self { paths: json };
+        return Self { };
     }
 }
 
@@ -55,7 +55,7 @@ struct Data {
 
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
-        let _allowed_paths: Vec<String> = self.paths.iter().map(|e| e.name.clone()).collect();
+        //let allowed_paths: Vec<String> = self.paths.iter().map(|e| e.name.clone()).collect();
 
         if let Some(method) = self.get_http_request_header(":method") {
             if method == "OPTIONS" {
