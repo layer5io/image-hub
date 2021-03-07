@@ -75,7 +75,6 @@ impl HttpContext for UpstreamCall {
         }
         if let Some(header) = self.get_http_request_header("Authorization") {
             if let Ok(token) = base64::decode(header) {
-                let json_test = format!("{:?}", self.paths);
                 let obj: Data = serde_json::from_slice(&token).unwrap();
                 proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", obj).as_str()).ok();
                 let curr = self.get_current_time();
@@ -97,11 +96,7 @@ impl HttpContext for UpstreamCall {
                 proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", &rl).as_str()).ok();
                 count = rl.count.to_string();
                 rl.set();
-                headers.append(&mut vec![
-                    ("x-rate-limit", &count),
-                    ("x-app-user", &rl.key),
-                    ("json_test", json_test.as_str()),
-                ]);
+                headers.append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
                 self.send_http_response(200, headers, Some(b"All Good!\n"));
                 return Action::Continue;
             }
@@ -111,7 +106,9 @@ impl HttpContext for UpstreamCall {
     }
 
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
+        let json_test = format!("{:?}", self.paths);
         self.set_http_response_header("x-app-serving", Some("rate-limit-filter"));
+        self.set_http_response_header("json_test", Some(json_test.as_str()));
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
