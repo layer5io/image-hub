@@ -21,7 +21,7 @@ pub fn _start() {
 struct UpstreamCall {
     data: Vec<JsonPath>,
     paths: Vec<String>,
-    test: Vec<u8>,
+    test: String,
 }
 
 impl UpstreamCall {
@@ -29,7 +29,7 @@ impl UpstreamCall {
         Self {
             data: Vec::new(),
             paths: Vec::new(),
-            test: Vec::new(),
+            test: String::new(),
         }
     }
 
@@ -123,7 +123,7 @@ impl RootContext for UpstreamCall {
     //TODO: Revisit this once the read only feature is released in Istio 1.10
     fn on_configure(&mut self, _: usize) -> bool {
         if let Some(config_bytes) = self.get_configuration() {
-            self.test = config_bytes.clone();
+            self.test = String::from_utf8(config_bytes.clone()).unwrap();
             let config_b64: Bytes =
                 base64::decode(String::from_utf8(config_bytes).unwrap()).unwrap();
             self.data = serde_json::from_slice(&config_b64).unwrap();
