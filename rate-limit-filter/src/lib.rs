@@ -21,6 +21,7 @@ pub fn _start() {
 struct UpstreamCall {
     data: Vec<JsonPath>,
     paths: Vec<String>,
+    test: Vec<u8>,
 }
 
 impl UpstreamCall {
@@ -28,6 +29,7 @@ impl UpstreamCall {
         Self {
             data: Vec::new(),
             paths: Vec::new(),
+            test: Vec::new(),
         }
     }
 
@@ -107,8 +109,10 @@ impl HttpContext for UpstreamCall {
 
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
         let json_test = format!("{:?}", self.paths);
+        let bytes_test = format!("{:?}", self.test);
         self.set_http_response_header("x-app-serving", Some("rate-limit-filter"));
         self.set_http_response_header("json_test", Some(json_test.as_str()));
+        self.set_http_response_header("bytes_test", Some(bytes_test.as_str()));
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
@@ -119,7 +123,9 @@ impl RootContext for UpstreamCall {
     //TODO: Revisit this once the read only feature is released in Istio 1.10
     fn on_configure(&mut self, _: usize) -> bool {
         if let Some(config_bytes) = self.get_configuration() {
-            let config_b64 = base64::decode(String::from_utf8(config_bytes).unwrap()).unwrap();
+            let config_b64: Bytes =
+                base64::decode(String::from_utf8(config_bytes).unwrap()).unwrap();
+            self.test = config_b64.clone();
             self.data = serde_json::from_slice(&config_b64).unwrap();
             self.paths = UpstreamCall::get_paths(&self.data);
         }
