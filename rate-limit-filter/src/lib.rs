@@ -1,16 +1,12 @@
 mod rate_limiter;
 mod yaml_parse;
 
-use rate_limiter::RateLimiter;
-use yaml_parse::JsonPath;
-
 use proxy_wasm::traits::*;
 use proxy_wasm::types::*;
+use rate_limiter::RateLimiter;
 use serde::Deserialize;
+use yaml_parse::JsonPath;
 
-use std::fs::File;
-use std::io::BufReader;
-use std::path::Path;
 use std::time::SystemTime;
 
 #[no_mangle]
@@ -23,22 +19,15 @@ pub fn _start() {
 
 #[derive(Debug)]
 struct UpstreamCall {
-    //data: Vec<JsonPath>,
-//paths: Vec<String>,
+    data: Vec<JsonPath>,
+    paths: Vec<String>,
 }
 
 impl UpstreamCall {
     fn new() -> Self {
-        /*Parsing JSON
-        let file_path = Path::new("filter.json");
-        let file = File::open(file_path).unwrap();
-        let reader = BufReader::new(file);
-        let json: Vec<JsonPath> = serde_json::from_reader(reader).unwrap();
-        let path_vec = UpstreamCall::get_paths(&json);
-        */
         Self {
-            //data: json,
-            //paths: path_vec,
+            data: Vec::new(),
+            paths: Vec::new(),
         }
     }
 
@@ -49,7 +38,7 @@ impl UpstreamCall {
     }
 }
 
-static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
+//static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
@@ -66,31 +55,27 @@ struct Data {
 
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
-        proxy_wasm::hostcalls::log(
-            LogLevel::Trace,
-            format!("Obj {:?}", self.get_configuration()).as_str(),
-        )
-        .ok();
         if let Some(method) = self.get_http_request_header(":method") {
             if method == "OPTIONS" {
                 self.send_http_response(204, CORS_HEADERS.to_vec(), None);
                 return Action::Pause;
             }
         }
-
+        /*
         if let Some(path) = self.get_http_request_header(":path") {
             if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
                 return Action::Continue;
             }
         }
-        /*
+        */
         if let Some(path) = self.get_http_request_header(":path") {
             if self.paths.binary_search(&path).is_ok() {
                 return Action::Continue;
             }
-        }*/
+        }
         if let Some(header) = self.get_http_request_header("Authorization") {
             if let Ok(token) = base64::decode(header) {
+                let json_test = format!("{:?}", self.paths);
                 let obj: Data = serde_json::from_slice(&token).unwrap();
                 proxy_wasm::hostcalls::log(LogLevel::Debug, format!("Obj {:?}", obj).as_str()).ok();
                 let curr = self.get_current_time();
@@ -115,7 +100,7 @@ impl HttpContext for UpstreamCall {
                 headers.append(&mut vec![
                     ("x-rate-limit", &count),
                     ("x-app-user", &rl.key),
-                    ("json", "parsed"),
+                    ("json_test", json_test.as_str()),
                 ]);
                 self.send_http_response(200, headers, Some(b"All Good!\n"));
                 return Action::Continue;
@@ -132,10 +117,15 @@ impl HttpContext for UpstreamCall {
     }
 }
 
-impl UpstreamCall {
-    // fn retrieve_rl(&self) -> RateLimiter {
-    // }
-}
-
 impl Context for UpstreamCall {}
-impl RootContext for UpstreamCall {}
+impl RootContext for UpstreamCall {
+    //TODO: Revisit this once the read only feature is released in Istio 1.10
+    fn on_configure(&mut self, _: usize) -> bool {
+        if let Some(config_bytes) = self.get_configuration() {
+            let config_b64 = base64::decode(config_bytes).unwrap();
+            self.data = serde_json::from_slice(&config_b64).unwrap();
+            self.paths = UpstreamCall::get_paths(&self.data);
+        }
+        true
+    }
+}
