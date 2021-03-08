@@ -12,32 +12,14 @@ use std::time::SystemTime;
 #[no_mangle]
 pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Info);
-    proxy_wasm::set_http_context(|_context_id, _root_context_id| -> Box<dyn HttpContext> {
-        Box::new(UpstreamCall::new())
+    proxy_wasm::set_root_context(|_| -> Box<dyn RootContext> {
+        Box::new(UpstreamCallRoot {
+            config_json: String::new(),
+        })
     });
-}
-
-#[derive(Debug)]
-struct UpstreamCall {
-    data: Vec<JsonPath>,
-    paths: Vec<String>,
-    test: String,
-}
-
-impl UpstreamCall {
-    fn new() -> Self {
-        Self {
-            data: Vec::new(),
-            paths: Vec::new(),
-            test: String::from("default"),
-        }
-    }
-
-    fn get_paths(json: &Vec<JsonPath>) -> Vec<String> {
-        let mut allowed_paths: Vec<String> = json.iter().map(|e| e.name.clone()).collect();
-        allowed_paths.sort();
-        allowed_paths
-    }
+    //proxy_wasm::set_http_context(|_context_id, _root_context_id| -> Box<dyn HttpContext> {
+    //    Box::new(UpstreamCall::new())
+    //});
 }
 
 //static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
@@ -54,6 +36,32 @@ struct Data {
     username: String,
     plan: String,
 }
+
+#[derive(Debug)]
+struct UpstreamCall {
+    config_json: Vec<JsonPath>,
+    paths: Vec<String>,
+    test: String,
+}
+
+impl UpstreamCall {
+    fn new(json: &String) -> Self {
+        let data: Vec<JsonPath> = serde_json::from_str(json).unwrap();
+        Self {
+            config_json: data.clone(),
+            paths: UpstreamCall::get_paths(&data),
+            test: format!("{:?}", data.clone()),
+        }
+    }
+
+    fn get_paths(json: &Vec<JsonPath>) -> Vec<String> {
+        let mut allowed_paths: Vec<String> = json.iter().map(|e| e.name.clone()).collect();
+        allowed_paths.sort();
+        allowed_paths
+    }
+}
+
+impl Context for UpstreamCall {}
 
 impl HttpContext for UpstreamCall {
     fn on_http_request_headers(&mut self, _num_headers: usize) -> Action {
@@ -118,17 +126,27 @@ impl HttpContext for UpstreamCall {
     }
 }
 
-impl Context for UpstreamCall {}
-impl RootContext for UpstreamCall {
+struct UpstreamCallRoot {
+    config_json: String,
+}
+
+impl Context for UpstreamCallRoot {}
+impl RootContext for UpstreamCallRoot {
     //TODO: Revisit this once the read only feature is released in Istio 1.10
     fn on_vm_start(&mut self, _: usize) -> bool {
         if let Some(config_bytes) = self.get_configuration() {
-            self.test = format!("{:?}", config_bytes.clone());
-            let config_b64: Bytes =
-                base64::decode(String::from_utf8(config_bytes).unwrap()).unwrap();
-            self.data = serde_json::from_str(&String::from_utf8(config_b64).unwrap()).unwrap();
-            self.paths = UpstreamCall::get_paths(&self.data);
+            let config_str = String::from_utf8(config_bytes).unwrap();
+            let config_b64 = base64::decode(config_str).unwrap();
+            self.config_json = String::from_utf8(config_b64).unwrap();
         }
         true
+    }
+
+    fn create_http_context(&self, _: u32) -> Option<Box<dyn HttpContext>> {
+        Some(Box::new(UpstreamCall::new(&self.config_json)))
+    }
+
+    fn get_type(&self) -> Option<ContextType> {
+        Some(ContextType::HttpContext)
     }
 }
