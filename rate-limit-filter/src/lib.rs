@@ -17,12 +17,8 @@ pub fn _start() {
             config_json: String::new(),
         })
     });
-    //proxy_wasm::set_http_context(|_context_id, _root_context_id| -> Box<dyn HttpContext> {
-    //    Box::new(UpstreamCall::new())
-    //});
 }
 
-//static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
@@ -71,13 +67,6 @@ impl HttpContext for UpstreamCall {
                 return Action::Pause;
             }
         }
-        /*
-        if let Some(path) = self.get_http_request_header(":path") {
-            if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
-                return Action::Continue;
-            }
-        }
-        */
         if let Some(path) = self.get_http_request_header(":path") {
             if self.paths.binary_search(&path).is_ok() {
                 return Action::Continue;
@@ -116,11 +105,7 @@ impl HttpContext for UpstreamCall {
     }
 
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
-        let json_test = format!("{:?}", self.paths);
-        let bytes_test = format!("{:?}", self.test);
         self.set_http_response_header("x-app-serving", Some("rate-limit-filter"));
-        self.set_http_response_header("json_test", Some(json_test.as_str()));
-        self.set_http_response_header("test", Some(bytes_test.as_str()));
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
