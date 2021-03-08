@@ -1,21 +1,21 @@
 use serde::Deserialize;
 
-#[derive(Clone, Deserialize, Debug)]
+#[derive(Clone, Debug, Deserialize, PartialEq, PartialOrd)]
 pub struct JsonPath {
     pub name: String,
-    rule: Rule,
+    pub rule: Rule,
 }
 
-#[derive(Clone, Deserialize, Debug)]
+#[derive(Clone, Debug, Deserialize, PartialEq, PartialOrd)]
 #[serde(rename_all(deserialize = "kebab-case"))]
 #[serde(tag = "ruleType", content = "parameters")]
 pub enum Rule {
-    RateLimiter(Vec<RateLimiter>),
+    RateLimiter(Vec<RateLimiterJson>),
     None,
 }
 
-#[derive(Clone, Deserialize, Debug)]
-pub struct RateLimiter {
+#[derive(Clone, Debug, Deserialize, PartialEq, PartialOrd)]
+pub struct RateLimiterJson {
     pub identifier: String,
     pub limit: u32,
 }
