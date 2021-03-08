@@ -112,7 +112,7 @@ impl HttpContext for UpstreamCall {
         let bytes_test = format!("{:?}", self.test);
         self.set_http_response_header("x-app-serving", Some("rate-limit-filter"));
         self.set_http_response_header("json_test", Some(json_test.as_str()));
-        self.set_http_response_header("bytes_test", Some(bytes_test.as_str()));
+        self.set_http_response_header("test", Some(bytes_test.as_str()));
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
