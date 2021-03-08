@@ -46,11 +46,11 @@ struct UpstreamCall {
 
 impl UpstreamCall {
     fn new(json: &String) -> Self {
-        //let data: Vec<JsonPath> = serde_json::from_str(json).unwrap();
+        let data: Vec<JsonPath> = serde_json::from_str(json).unwrap();
         Self {
-            config_json: Vec::new(), //data.clone(),
-            paths: Vec::new(),       //UpstreamCall::get_paths(&data),
-            test: json.clone(),      //format!("{:?}", data.clone()),
+            config_json: data.clone(),
+            paths: UpstreamCall::get_paths(&data),
+            test: format!("{:?}", data.clone()),
         }
     }
 
