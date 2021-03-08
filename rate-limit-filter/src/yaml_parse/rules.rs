@@ -8,7 +8,7 @@ pub struct JsonPath {
 
 #[derive(Clone, Deserialize, Debug)]
 #[serde(rename_all(deserialize = "kebab-case"))]
-#[serde(tag = "RuleType", content = "parameters")]
+#[serde(tag = "ruleType", content = "parameters")]
 pub enum Rule {
     RateLimiter(Vec<RateLimiter>),
     None,
