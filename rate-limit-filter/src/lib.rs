@@ -121,11 +121,12 @@ impl HttpContext for UpstreamCall {
 impl Context for UpstreamCall {}
 impl RootContext for UpstreamCall {
     //TODO: Revisit this once the read only feature is released in Istio 1.10
-    fn on_configure(&mut self, _: usize) -> bool {
+    fn on_vm_start(&mut self, _: usize) -> bool {
         if let Some(config_bytes) = self.get_configuration() {
             self.test = format!("{:?}", config_bytes.clone());
-            //let config_b64: Bytes = base64::decode(String::from_utf8(config_bytes).unwrap()).unwrap();
-            self.data = serde_json::from_str(&String::from_utf8(config_bytes).unwrap()).unwrap();
+            let config_b64: Bytes =
+                base64::decode(String::from_utf8(config_bytes).unwrap()).unwrap();
+            self.data = serde_json::from_str(&String::from_utf8(config_b64).unwrap()).unwrap();
             self.paths = UpstreamCall::get_paths(&self.data);
         }
         true
