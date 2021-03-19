@@ -93,13 +93,13 @@ impl HttpContext for UpstreamCall {
             )
             .ok();
         }
-
+        /*
         if let Some(path) = self.get_http_request_header(":path") {
             if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
                 return Action::Continue;
             }
         }
-        /*
+        */
         if let Some(path) = self.get_http_request_header(":path") {
             if UpstreamCall::get_paths(&self.config_json)
                 .binary_search(&path)
@@ -107,7 +107,7 @@ impl HttpContext for UpstreamCall {
             {
                 return Action::Continue;
             }
-        }*/
+        }
 
         if let Some(plans_vec) =
             self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
