@@ -46,20 +46,18 @@ impl UpstreamCall {
         }
     }
 
-    fn is_none(&self, path: String) -> Option<String> {
-        let comp_type = Rule::None;
+    fn rule_is_none(&self, path: String) -> Option<String> {
         let rule_vec = self.config_json.get(&path).unwrap();
-        if std::mem::discriminant(rule_vec) == std::mem::discriminant(&comp_type) {
+        if std::mem::discriminant(rule_vec) == std::mem::discriminant(&Rule::None) {
             return Some(path);
         }
         return None;
     }
 
-    fn is_rate_limiter(&self, path: String) -> Option<Vec<RateLimiterJson>> {
+    fn rule_is_rate_limiter(&self, path: String) -> Option<Vec<RateLimiterJson>> {
         // only meant to check if rule type is rate limiter
-        let comp_type = Rule::RateLimiter(Vec::new());
         let rule = self.config_json.get(&path).unwrap();
-        if std::mem::discriminant(rule) == std::mem::discriminant(&comp_type) {
+        if std::mem::discriminant(rule) == std::mem::discriminant(&Rule::RateLimiter(Vec::new())) {
             if let Rule::RateLimiter(plans_vec) = rule {
                 return Some(plans_vec.to_vec());
             }
@@ -78,15 +76,16 @@ impl HttpContext for UpstreamCall {
                 return Action::Pause;
             }
         }
-        if let Some(_) = self.is_none(self.get_http_request_header(":path").unwrap()) {
+        if let Some(_) = self.rule_is_none(self.get_http_request_header(":path").unwrap()) {
             return Action::Continue;
         }
 
+        proxy_wasm::hostcalls::log(LogLevel::Info, "Working!").ok();
+        proxy_wasm::hostcalls::log(LogLevel::Warn, "Working!").ok();
+
         if let Some(plans_vec) =
-            self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
+            self.rule_is_rate_limiter(self.get_http_request_header(":path").unwrap())
         {
-            let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
-            proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test3: {:?}", test).as_str()).ok();
             if let Some(header) = self.get_http_request_header("Authorization") {
                 if let Ok(token) = base64::decode(header) {
                     let obj: Data = serde_json::from_slice(&token).unwrap();
@@ -143,7 +142,7 @@ struct UpstreamCallRoot {
 }
 
 impl Context for UpstreamCallRoot {}
-impl RootContext for UpstreamCallRoot {
+impl<'a> RootContext for UpstreamCallRoot {
     //TODO: Revisit this once the read only feature is released in Istio 1.10
     fn on_vm_start(&mut self, _: usize) -> bool {
         if let Some(config_bytes) = self.get_configuration() {
