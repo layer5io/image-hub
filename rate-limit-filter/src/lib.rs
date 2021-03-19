@@ -84,10 +84,12 @@ impl HttpContext for UpstreamCall {
             proxy_wasm::hostcalls::log(
                 LogLevel::Warn,
                 format!(
-                    "test1: {:?}",
+                    "test1: {:?}\n {:?}\n {:?}",&path,
                     UpstreamCall::get_paths(&self.config_json)
                         .binary_search(&path)
-                        .is_ok()
+                        .is_ok(),
+                    UpstreamCall::get_paths(&self.config_json)
+                        .binary_search(&path)
                 )
                 .as_str(),
             )
@@ -108,8 +110,9 @@ impl HttpContext for UpstreamCall {
                 proxy_wasm::hostcalls::log(
                     LogLevel::Warn,
                     format!(
-                        "test2: {:?}",
-                        ALLOWED_PATHS.binary_search(&path.as_str()).is_ok()
+                        "test2: {:?}\n {:?}\n {:?}",&path,
+                        ALLOWED_PATHS.binary_search(&path.as_str()).is_ok(),
+                        ALLOWED_PATHS.binary_search(&path.as_str())
                     )
                     .as_str(),
                 )
