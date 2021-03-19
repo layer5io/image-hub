@@ -52,6 +52,20 @@ impl UpstreamCall {
         allowed_paths
     }
 
+    fn is_none(&self, path: String) -> Option<String> {
+        let comp_type = Rule::None;
+        let rule_vec = self
+            .config_json
+            .binary_search_by(|x| x.name.cmp(&path))
+            .unwrap();
+        if std::mem::discriminant(&self.config_json[rule_vec].rule)
+            == std::mem::discriminant(&comp_type)
+        {
+            return Some(path);
+        }
+        return None;
+    }
+
     fn is_rate_limiter(&self, path: String) -> Option<Vec<RateLimiterJson>> {
         // only meant to check if rule type is rate limiter
         let comp_type = Rule::RateLimiter(Vec::new());
@@ -84,12 +98,12 @@ impl HttpContext for UpstreamCall {
             proxy_wasm::hostcalls::log(
                 LogLevel::Warn,
                 format!(
-                    "test1: {:?}\n {:?}\n {:?}",&path,
+                    "test1: {:?}\n {:?}\n {:?}",
+                    &path,
                     UpstreamCall::get_paths(&self.config_json)
                         .binary_search(&path)
                         .is_ok(),
-                    UpstreamCall::get_paths(&self.config_json)
-                        .binary_search(&path)
+                    UpstreamCall::get_paths(&self.config_json).binary_search(&path)
                 )
                 .as_str(),
             )
@@ -102,23 +116,24 @@ impl HttpContext for UpstreamCall {
             }
         }
         */
-        if let Some(path) = self.get_http_request_header(":path") {
+        if let Some(path) = self.is_none(self.get_http_request_header(":path").unwrap()) {
+            /*
             if UpstreamCall::get_paths(&self.config_json)
                 .binary_search(&path)
                 .is_ok()
-            {   
-                proxy_wasm::hostcalls::log(
-                    LogLevel::Warn,
-                    format!(
-                        "test2: {:?}\n {:?}\n {:?}",&path,
-                        ALLOWED_PATHS.binary_search(&path.as_str()).is_ok(),
-                        ALLOWED_PATHS.binary_search(&path.as_str())
-                    )
-                    .as_str(),
+            */
+            proxy_wasm::hostcalls::log(
+                LogLevel::Warn,
+                format!(
+                    "test2: {:?}\n {:?}\n {:?}",
+                    &path,
+                    ALLOWED_PATHS.binary_search(&path.as_str()).is_ok(),
+                    ALLOWED_PATHS.binary_search(&path.as_str())
                 )
-                .ok();
-                return Action::Continue;
-            }
+                .as_str(),
+            )
+            .ok();
+            return Action::Continue;
         }
 
         if let Some(plans_vec) =
