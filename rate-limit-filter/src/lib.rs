@@ -80,6 +80,8 @@ impl HttpContext for UpstreamCall {
             }
         }
         if let Some(path) = self.get_http_request_header(":path") {
+            let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
+            proxy_wasm::hostcalls::log(LogLevel::Warn, format!(" {:?}", test).as_str()).ok();
             if UpstreamCall::get_paths(&self.config_json)
                 .binary_search(&path)
                 .is_ok()
@@ -87,9 +89,7 @@ impl HttpContext for UpstreamCall {
                 return Action::Continue;
             }
         }
-        let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
 
-        proxy_wasm::hostcalls::log(LogLevel::Info, format!(" {:?}", test).as_str()).ok();
         if let Some(plans_vec) = 
             self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
         {
