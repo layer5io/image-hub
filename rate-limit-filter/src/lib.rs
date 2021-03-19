@@ -104,7 +104,16 @@ impl HttpContext for UpstreamCall {
             if UpstreamCall::get_paths(&self.config_json)
                 .binary_search(&path)
                 .is_ok()
-            {
+            {   
+                proxy_wasm::hostcalls::log(
+                    LogLevel::Warn,
+                    format!(
+                        "test1: {:?}",
+                        "hello"
+                    )
+                    .as_str(),
+                )
+                .ok();
                 return Action::Continue;
             }
         }
