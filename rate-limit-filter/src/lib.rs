@@ -88,8 +88,8 @@ impl HttpContext for UpstreamCall {
                 return Action::Continue;
             }
         }
-        if let Some(s) = self.is_rate_limiter(self.get_http_request_header(":path").unwrap()){
-            self.test = format!("{:?}",s);
+        if let None = self.is_rate_limiter(self.get_http_request_header(":path").unwrap()){
+            self.test = String::from("damnit");
         }
 
         if let Some(plans_vec) = 
