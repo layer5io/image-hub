@@ -80,8 +80,6 @@ impl HttpContext for UpstreamCall {
             }
         }
         if let Some(path) = self.get_http_request_header(":path") {
-            let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
-            proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test: {:?}", test).as_str()).ok();
             if UpstreamCall::get_paths(&self.config_json)
                 .binary_search(&path)
                 .is_ok()
@@ -92,7 +90,9 @@ impl HttpContext for UpstreamCall {
 
         if let Some(plans_vec) = 
             self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
-        {
+        {   
+            let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
+            proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test2: {:?}", test).as_str()).ok();
             if let Some(header) = self.get_http_request_header("Authorization") {
                 if let Ok(token) = base64::decode(header) {
                     let obj: Data = serde_json::from_slice(&token).unwrap();
