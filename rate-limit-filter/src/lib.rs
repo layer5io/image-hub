@@ -88,7 +88,7 @@ impl HttpContext for UpstreamCall {
                 return Action::Continue;
             }
         }
-        
+
         if let Some(plans_vec) = 
             self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
         {
@@ -137,12 +137,7 @@ impl HttpContext for UpstreamCall {
     }
 
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
-        match self.is_rate_limiter(self.get_http_request_header(":path").unwrap()) {
-            Some(s) =>self.test = String::from("hello"),
-            None => self.test = String::from("ohno"),
-        }
         self.set_http_response_header("x-app-serving", Some("rate-limit-filter"));
-        self.set_http_response_header("x-test", Some(&self.test));
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
