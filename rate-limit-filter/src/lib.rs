@@ -7,6 +7,7 @@ use proxy_wasm::types::*;
 use rate_limiter::RateLimiter;
 use serde::Deserialize;
 
+use std::collections::HashMap;
 use std::time::SystemTime;
 
 #[no_mangle]
@@ -19,7 +20,6 @@ pub fn _start() {
     });
 }
 
-static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
@@ -36,31 +36,25 @@ struct Data {
 
 #[derive(Debug)]
 struct UpstreamCall {
-    config_json: Vec<JsonPath>,
+    config_json: HashMap<String, Rule>,
 }
 
 impl UpstreamCall {
     fn new(json_str: &String) -> Self {
-        let mut json: Vec<JsonPath> = serde_json::from_str(json_str).unwrap();
-        json.sort_by(|a, b| a.name.partial_cmp(&b.name).unwrap());
-        Self { config_json: json }
-    }
-
-    fn get_paths(json: &Vec<JsonPath>) -> Vec<String> {
-        let mut allowed_paths: Vec<String> = json.iter().map(|e| e.name.clone()).collect();
-        allowed_paths.sort();
-        allowed_paths
+        let json: Vec<JsonPath> = serde_json::from_str(json_str).unwrap();
+        let mut json_hm: HashMap<String, Rule> = HashMap::new();
+        for i in json {
+            json_hm.insert(i.name, i.rule);
+        }
+        Self {
+            config_json: json_hm,
+        }
     }
 
     fn is_none(&self, path: String) -> Option<String> {
         let comp_type = Rule::None;
-        let rule_vec = self
-            .config_json
-            .binary_search_by(|x| x.name.cmp(&path))
-            .unwrap();
-        if std::mem::discriminant(&self.config_json[rule_vec].rule)
-            == std::mem::discriminant(&comp_type)
-        {
+        let rule_vec = self.config_json.get(&path).unwrap();
+        if std::mem::discriminant(rule_vec) == std::mem::discriminant(&comp_type) {
             return Some(path);
         }
         return None;
@@ -69,14 +63,9 @@ impl UpstreamCall {
     fn is_rate_limiter(&self, path: String) -> Option<Vec<RateLimiterJson>> {
         // only meant to check if rule type is rate limiter
         let comp_type = Rule::RateLimiter(Vec::new());
-        let rule_vec = self
-            .config_json
-            .binary_search_by(|x| x.name.cmp(&path))
-            .unwrap();
-        if std::mem::discriminant(&self.config_json[rule_vec].rule)
-            == std::mem::discriminant(&comp_type)
-        {
-            if let Rule::RateLimiter(plans_vec) = &self.config_json[rule_vec].rule {
+        let rule = self.config_json.get(&path).unwrap();
+        if std::mem::discriminant(rule) == std::mem::discriminant(&comp_type) {
+            if let Rule::RateLimiter(plans_vec) = rule {
                 return Some(plans_vec.to_vec());
             }
         }
@@ -94,45 +83,7 @@ impl HttpContext for UpstreamCall {
                 return Action::Pause;
             }
         }
-        if let Some(path) = self.get_http_request_header(":path") {
-            proxy_wasm::hostcalls::log(
-                LogLevel::Warn,
-                format!(
-                    "test1: {:?}\n {:?}\n {:?}",
-                    &path,
-                    UpstreamCall::get_paths(&self.config_json)
-                        .binary_search(&path)
-                        .is_ok(),
-                    UpstreamCall::get_paths(&self.config_json).binary_search(&path)
-                )
-                .as_str(),
-            )
-            .ok();
-        }
-        /*
-        if let Some(path) = self.get_http_request_header(":path") {
-            if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
-                return Action::Continue;
-            }
-        }
-        */
-        if let Some(path) = self.is_none(self.get_http_request_header(":path").unwrap()) {
-            /*
-            if UpstreamCall::get_paths(&self.config_json)
-                .binary_search(&path)
-                .is_ok()
-            */
-            proxy_wasm::hostcalls::log(
-                LogLevel::Warn,
-                format!(
-                    "test2: {:?}\n {:?}\n {:?}",
-                    &path,
-                    ALLOWED_PATHS.binary_search(&path.as_str()).is_ok(),
-                    ALLOWED_PATHS.binary_search(&path.as_str())
-                )
-                .as_str(),
-            )
-            .ok();
+        if let Some(_) = self.is_none(self.get_http_request_header(":path").unwrap()) {
             return Action::Continue;
         }
 
