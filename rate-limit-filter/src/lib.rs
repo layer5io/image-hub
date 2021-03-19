@@ -52,7 +52,7 @@ impl UpstreamCall {
         allowed_paths
     }
 
-    fn is_rate_limiter(&self, path: String) -> Option<Vec<RateLimiterJson>> {
+    fn is_rate_limiter(&self, path: String) -> bool{//Option<Vec<RateLimiterJson>> {
         // only meant to check if rule type is rate limiter
         let comp_type = Rule::RateLimiter(Vec::new());
         let rule_vec = self
@@ -63,10 +63,11 @@ impl UpstreamCall {
             == std::mem::discriminant(&comp_type)
         {
             if let Rule::RateLimiter(plans_vec) = &self.config_json[rule_vec].rule {
-                return Some(plans_vec.to_vec());
+                //return Some(plans_vec.to_vec());
+                return true
             }
         }
-        return None;
+        return false
     }
 }
 
@@ -88,7 +89,7 @@ impl HttpContext for UpstreamCall {
                 return Action::Continue;
             }
         }
-        self.test = format!("{:?}",self.is_rate_limiter(self.get_http_request_header(":path").unwrap()).unwrap());
+        /*self.test = format!("{:?}",self.is_rate_limiter(self.get_http_request_header(":path").unwrap()).unwrap());
         if let Some(plans_vec) = 
             self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
         {
@@ -131,14 +132,14 @@ impl HttpContext for UpstreamCall {
                     return Action::Continue;
                 }
             }
-        }
+        }*/
         self.send_http_response(401, CORS_HEADERS.to_vec(), Some(b"Unauthorized\n"));
         Action::Pause
     }
 
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
         self.set_http_response_header("x-app-serving", Some("rate-limit-filter"));
-        self.set_http_response_header("x-test", Some(&format!("{:?}",self.is_rate_limiter(self.get_http_request_header(":path").unwrap()).unwrap())));
+        self.set_http_response_header("x-test", Some(&format!("{:?}",self.is_rate_limiter(self.get_http_request_header(":path").unwrap()))));
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
