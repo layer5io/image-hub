@@ -36,17 +36,13 @@ struct Data {
 #[derive(Debug)]
 struct UpstreamCall {
     config_json: Vec<JsonPath>,
-    test: String,
 }
 
 impl UpstreamCall {
     fn new(json_str: &String) -> Self {
         let mut json: Vec<JsonPath> = serde_json::from_str(json_str).unwrap();
         json.sort_by(|a, b| a.name.partial_cmp(&b.name).unwrap());
-        Self {
-            config_json: json,
-            test: String::from("default"),
-        }
+        Self { config_json: json}
     }
 
     fn get_paths(json: &Vec<JsonPath>) -> Vec<String> {
@@ -69,7 +65,7 @@ impl UpstreamCall {
                 return Some(plans_vec.to_vec());
             }
         }
-        return None;
+        return None
     }
 }
 
@@ -84,8 +80,6 @@ impl HttpContext for UpstreamCall {
             }
         }
         if let Some(path) = self.get_http_request_header(":path") {
-            proxy_wasm::hostcalls::log(LogLevel::Warn, "testing")
-                        .ok();
             if UpstreamCall::get_paths(&self.config_json)
                 .binary_search(&path)
                 .is_ok()
@@ -93,8 +87,13 @@ impl HttpContext for UpstreamCall {
                 return Action::Continue;
             }
         }
+        let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
 
-        if let Some(header) = self.get_http_request_header("Authorization") {
+        proxy_wasm::hostcalls::log(LogLevel::Info, format!(" {:?}", test).as_str()).ok();
+        if let Some(plans_vec) = 
+            self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
+        {
+            if let Some(header) = self.get_http_request_header("Authorization") {
                 if let Ok(token) = base64::decode(header) {
                     let obj: Data = serde_json::from_slice(&token).unwrap();
 
@@ -110,13 +109,13 @@ impl HttpContext for UpstreamCall {
                     let mut headers = CORS_HEADERS.to_vec();
                     let count: String;
 
-                    /*let limit = plans_vec
+                    let limit = plans_vec
                         .into_iter()
                         .filter(|x| x.identifier == obj.plan)
                         .map(|x| x.limit)
                         .collect::<Vec<u32>>()[0];
-                    */
-                    if rl.update(mn as i32) > 10{//limit {
+
+                    if rl.update(mn as i32) > limit {
                         count = rl.count.to_string();
                         headers
                             .append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
@@ -132,7 +131,7 @@ impl HttpContext for UpstreamCall {
                     self.send_http_response(200, headers, Some(b"All Good!\n"));
                     return Action::Continue;
                 }
-            
+            }
         }
         self.send_http_response(401, CORS_HEADERS.to_vec(), Some(b"Unauthorized\n"));
         Action::Pause
@@ -140,7 +139,6 @@ impl HttpContext for UpstreamCall {
 
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
         self.set_http_response_header("x-app-serving", Some("rate-limit-filter"));
-        self.set_http_response_header("x-test", Some(&self.test));
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
