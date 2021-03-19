@@ -42,7 +42,7 @@ impl UpstreamCall {
     fn new(json_str: &String) -> Self {
         let mut json: Vec<JsonPath> = serde_json::from_str(json_str).unwrap();
         json.sort_by(|a, b| a.name.partial_cmp(&b.name).unwrap());
-        Self { config_json: json}
+        Self { config_json: json }
     }
 
     fn get_paths(json: &Vec<JsonPath>) -> Vec<String> {
@@ -65,7 +65,7 @@ impl UpstreamCall {
                 return Some(plans_vec.to_vec());
             }
         }
-        return None
+        return None;
     }
 }
 
@@ -88,12 +88,12 @@ impl HttpContext for UpstreamCall {
             }
         }
 
-        if let Some(plans_vec) = 
-            self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
-        {   
+        if let Some(header) = self.get_http_request_header("Authorization") {
             let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
             proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test2: {:?}", test).as_str()).ok();
-            if let Some(header) = self.get_http_request_header("Authorization") {
+            if let Some(plans_vec) =
+                self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
+            {
                 if let Ok(token) = base64::decode(header) {
                     let obj: Data = serde_json::from_slice(&token).unwrap();
 
