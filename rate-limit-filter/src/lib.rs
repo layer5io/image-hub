@@ -109,7 +109,7 @@ impl HttpContext for UpstreamCall {
                     LogLevel::Warn,
                     format!(
                         "test1: {:?}",
-                        "hello"
+                        ALLOWED_PATHS.binary_search(&path.as_str()).is_ok()
                     )
                     .as_str(),
                 )
