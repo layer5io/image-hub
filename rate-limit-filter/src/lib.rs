@@ -88,6 +88,8 @@ impl HttpContext for UpstreamCall {
             }
         }
 
+        proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test2: {:?}", self.get_http_request_header("Authorization")).as_str()).ok();
+
         if let Some(header) = self.get_http_request_header("Authorization") {
             let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
             proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test2: {:?}", test).as_str()).ok();
