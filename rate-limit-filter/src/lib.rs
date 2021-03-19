@@ -43,7 +43,7 @@ impl UpstreamCall {
     fn new(json_str: &String) -> Self {
         let mut json: Vec<JsonPath> = serde_json::from_str(json_str).unwrap();
         json.sort_by(|a, b| a.name.partial_cmp(&b.name).unwrap());
-        Self { config_json: json, test:String::new() }
+        Self { config_json: json, test:String::from("default") }
     }
 
     fn get_paths(json: &Vec<JsonPath>) -> Vec<String> {
@@ -87,6 +87,9 @@ impl HttpContext for UpstreamCall {
             {
                 return Action::Continue;
             }
+        }
+        if let Some(s) = self.is_rate_limiter(self.get_http_request_header(":path").unwrap()){
+            self.test = format!("{:?}",s);
         }
 
         if let Some(plans_vec) = 
@@ -138,6 +141,7 @@ impl HttpContext for UpstreamCall {
 
     fn on_http_response_headers(&mut self, _num_headers: usize) -> Action {
         self.set_http_response_header("x-app-serving", Some("rate-limit-filter"));
+        self.set_http_response_header("x-test", Some(&self.test));
         proxy_wasm::hostcalls::log(LogLevel::Debug, format!("RESPONDING").as_str()).ok();
         Action::Continue
     }
