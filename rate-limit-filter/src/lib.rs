@@ -81,7 +81,7 @@ impl HttpContext for UpstreamCall {
         }
         if let Some(path) = self.get_http_request_header(":path") {
             let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
-            proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test1: {:?}", test).as_str()).ok();
+            proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test1: {:?}", self.is_rate_limiter(self.get_http_request_header(":path").unwrap())).as_str()).ok();
             if UpstreamCall::get_paths(&self.config_json)
                 .binary_search(&path)
                 .is_ok()
