@@ -80,9 +80,6 @@ impl HttpContext for UpstreamCall {
             return Action::Continue;
         }
 
-        proxy_wasm::hostcalls::log(LogLevel::Info, "Working!").ok();
-        proxy_wasm::hostcalls::log(LogLevel::Warn, "Working!").ok();
-
         if let Some(plans_vec) =
             self.rule_is_rate_limiter(self.get_http_request_header(":path").unwrap())
         {
