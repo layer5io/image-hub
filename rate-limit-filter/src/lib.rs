@@ -93,12 +93,6 @@ impl HttpContext for UpstreamCall {
         }
 
         if let Some(header) = self.get_http_request_header("Authorization") {
-            if let None = self.is_rate_limiter(self.get_http_request_header(":path").unwrap()) {
-                self.test = String::from("damnit");
-            }
-            if let Some(plans_vec) =
-                self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
-            {
                 if let Ok(token) = base64::decode(header) {
                     let obj: Data = serde_json::from_slice(&token).unwrap();
 
@@ -114,13 +108,13 @@ impl HttpContext for UpstreamCall {
                     let mut headers = CORS_HEADERS.to_vec();
                     let count: String;
 
-                    let limit = plans_vec
+                    /*let limit = plans_vec
                         .into_iter()
                         .filter(|x| x.identifier == obj.plan)
                         .map(|x| x.limit)
                         .collect::<Vec<u32>>()[0];
-
-                    if rl.update(mn as i32) > limit {
+                    */
+                    if rl.update(mn as i32) > 10{//limit {
                         count = rl.count.to_string();
                         headers
                             .append(&mut vec![("x-rate-limit", &count), ("x-app-user", &rl.key)]);
@@ -136,7 +130,7 @@ impl HttpContext for UpstreamCall {
                     self.send_http_response(200, headers, Some(b"All Good!\n"));
                     return Action::Continue;
                 }
-            }
+            
         }
         self.send_http_response(401, CORS_HEADERS.to_vec(), Some(b"Unauthorized\n"));
         Action::Pause
