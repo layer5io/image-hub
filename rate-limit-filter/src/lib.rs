@@ -81,6 +81,20 @@ impl HttpContext for UpstreamCall {
             }
         }
         if let Some(path) = self.get_http_request_header(":path") {
+            proxy_wasm::hostcalls::log(
+                LogLevel::Warn,
+                format!(
+                    "test1: {:?}",
+                    UpstreamCall::get_paths(&self.config_json)
+                        .binary_search(&path)
+                        .is_ok()
+                )
+                .as_str(),
+            )
+            .ok();
+        }
+
+        if let Some(path) = self.get_http_request_header(":path") {
             if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
                 return Action::Continue;
             }
@@ -95,13 +109,12 @@ impl HttpContext for UpstreamCall {
             }
         }*/
 
-        proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test2: {:?}", self.get_http_request_header("Authorization")).as_str()).ok();
-
-        if let Some(plans_vec) = self.is_rate_limiter(self.get_http_request_header(":path").unwrap()){
+        if let Some(plans_vec) =
+            self.is_rate_limiter(self.get_http_request_header(":path").unwrap())
+        {
             let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
-            proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test3: {:?}", test).as_str()).ok();
+            proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test2: {:?}", test).as_str()).ok();
             if let Some(header) = self.get_http_request_header("Authorization") {
-            
                 if let Ok(token) = base64::decode(header) {
                     let obj: Data = serde_json::from_slice(&token).unwrap();
 
