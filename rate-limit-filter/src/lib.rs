@@ -19,6 +19,7 @@ pub fn _start() {
     });
 }
 
+static ALLOWED_PATHS: [&str; 4] = ["/auth", "/signup", "/upgrade", "/pull"];
 static CORS_HEADERS: [(&str, &str); 5] = [
     ("Powered-By", "proxy-wasm"),
     ("Access-Control-Allow-Origin", "*"),
@@ -80,15 +81,19 @@ impl HttpContext for UpstreamCall {
             }
         }
         if let Some(path) = self.get_http_request_header(":path") {
-            let test = self.is_rate_limiter(self.get_http_request_header(":path").unwrap());
-            proxy_wasm::hostcalls::log(LogLevel::Warn, &format!("test1: {:?}", test)).ok();
+            if ALLOWED_PATHS.binary_search(&path.as_str()).is_ok() {
+                return Action::Continue;
+            }
+        }
+        /*
+        if let Some(path) = self.get_http_request_header(":path") {
             if UpstreamCall::get_paths(&self.config_json)
                 .binary_search(&path)
                 .is_ok()
             {
-                //return Action::Continue;
+                return Action::Continue;
             }
-        }
+        }*/
 
         proxy_wasm::hostcalls::log(LogLevel::Warn, format!("test2: {:?}", self.get_http_request_header("Authorization")).as_str()).ok();
 
