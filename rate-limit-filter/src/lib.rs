@@ -15,7 +15,7 @@ pub fn _start() {
     proxy_wasm::set_log_level(LogLevel::Info);
     proxy_wasm::set_root_context(|_| -> Box<dyn RootContext> {
         Box::new(UpstreamCallRoot {
-            config_json: String::new(),
+            config_json: HashMap::new(),
         })
     });
 }
@@ -40,14 +40,9 @@ struct UpstreamCall {
 }
 
 impl UpstreamCall {
-    fn new(json_str: &String) -> Self {
-        let json: Vec<JsonPath> = serde_json::from_str(json_str).unwrap();
-        let mut json_hm: HashMap<String, Rule> = HashMap::new();
-        for i in json {
-            json_hm.insert(i.name, i.rule);
-        }
+    fn new(json_hm: &HashMap<String, Rule>) -> Self {
         Self {
-            config_json: json_hm,
+            config_json: json_hm.clone(),
         }
     }
 
@@ -144,7 +139,7 @@ impl HttpContext for UpstreamCall {
 }
 
 struct UpstreamCallRoot {
-    config_json: String,
+    config_json: HashMap<String, Rule>,
 }
 
 impl Context for UpstreamCallRoot {}
@@ -154,7 +149,13 @@ impl RootContext for UpstreamCallRoot {
         if let Some(config_bytes) = self.get_configuration() {
             let config_str = String::from_utf8(config_bytes).unwrap();
             let config_b64 = base64::decode(config_str).unwrap();
-            self.config_json = String::from_utf8(config_b64).unwrap();
+            let json_str = String::from_utf8(config_b64).unwrap();
+
+            let json_vec: Vec<JsonPath> = serde_json::from_str(&json_str).unwrap();
+
+            for i in json_vec {
+                self.config_json.insert(i.name, i.rule);
+            }
         }
         true
     }
