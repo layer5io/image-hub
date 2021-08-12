@@ -133,7 +133,8 @@ Our projects are community-built and welcome collaboration. 👍 Be sure to see 
 **Open Source First**
 
 <p>We build projects to provide learning environments, deployment and operational best practices, performance benchmarks, create documentation, share networking opportunities, and more. Our shared commitment to the open source spirit pushes Layer5 projects forward.</p>
-<p>The layer5.io website uses Gatsby, React, and GitHub Pages. Site content is found under the [`master` branch](https://github.com/layer5io/layer5/tree/master)
+<p>
+   The layer5.io website uses Gatsby, React, and GitHub Pages. Site content is found under the [`master` branch](https://github.com/layer5io/layer5/tree/master)
 </p>
 
 - See [contributing instructions](https://github.com/layer5io/layer5/blob/master/CONTRIBUTING.md)
