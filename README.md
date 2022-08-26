@@ -63,7 +63,7 @@ Image Hub supports Envoy-based data planes. Deployment instructions for each sup
 1. After signing up, you should be redirected to the login page, where you can log in and start using the sample app.
 1. On the main page, open up the network tab, and reload the page. This will allow you to see the request-response of the app.
 1. Go ahead and click the download button a couple of times. You'll notice that there is nothing actually limiting you from crossing the number of pulls according to the plan you chose!
-1. Alternatively, you could test the above by navigating to http://imagehub.meshery.io:31118/pull and then looking at the request-responses.
+1. Alternatively, you could test the above by navigating to imagehub.meshery.io:< environment port >/pull and then looking at the request-responses.
 
 ## Deploying the Rate Limiter WASM Filter for Envoy
 
